@@ -1,0 +1,385 @@
+---
+description: NestJS backend coding standards and review checklist
+globs: apps/nestjs-backend/**/*.ts
+alwaysApply: false
+---
+
+# Backend Standards (NestJS)
+
+Code review checklist for backend development.
+
+---
+
+## Module Architecture
+
+### Layer Separation
+```typescript
+// ✅ CORRECT - clear separation
+users/
+  users.controller.ts    // HTTP layer
+  users.service.ts       // Business logic
+  users.repository.ts    // Data access
+  dto/
+    create-user.dto.ts
+    update-user.dto.ts
+  entities/
+    user.entity.ts
+
+// ❌ WRONG - business logic in controller
+@Controller('users')
+export class UsersController {
+  @Post()
+  async create(@Body() dto: CreateUserDto) {
+    // Direct DB access, no service layer
+    return this.prisma.user.create({ data: dto });
+  }
+}
+```
+
+### Controller Responsibilities
+- Handle HTTP concerns only (request/response)
+- Delegate business logic to services
+- Apply guards, interceptors, pipes
+- Return appropriate status codes
+
+### Service Responsibilities
+- Implement business logic
+- Orchestrate multiple repositories
+- Handle transactions
+- Throw domain exceptions
+
+### Repository Responsibilities
+- Abstract Prisma queries
+- Encapsulate data access patterns
+- No business logic
+
+---
+
+## DTO & Validation
+
+### Unified Validation Strategy
+**Use `class-validator` + `class-transformer` exclusively. Do NOT mix with zod/joi.**
+
+```typescript
+// ✅ CORRECT
+import { IsEmail, IsString, MinLength } from 'class-validator';
+
+export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+
+// ❌ WRONG - mixing validation libraries
+import { z } from 'zod';
+export const createUserSchema = z.object({ ... });
+```
+
+### DTO Best Practices
+- One DTO per operation: `CreateUserDto`, `UpdateUserDto`
+- Use `PartialType`, `PickType`, `OmitType` for composition
+- Export DTOs to `@repo/shared` if used by frontend
+- Apply `@ApiProperty()` for Swagger docs
+
+### Global Validation Pipe
+```typescript
+// main.ts - ensure this is configured
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,        // Strip non-decorated properties
+    forbidNonWhitelisted: true, // Throw on extra properties
+    transform: true,        // Auto-transform to DTO class
+  }),
+);
+```
+
+---
+
+## Error Handling
+
+### Exception Strategy
+```typescript
+// ✅ CORRECT - use built-in exceptions
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+
+if (!user) {
+  throw new NotFoundException(`User with ID ${id} not found`);
+}
+
+if (user.status === 'banned') {
+  throw new BadRequestException('User is banned', 'USER_BANNED');
+}
+
+// ❌ WRONG - generic errors
+throw new Error('Something went wrong');
+```
+
+### Custom Exception Filter
+Use centralized exception filter for consistent error format:
+
+```typescript
+// All errors should produce:
+{
+  statusCode: number;
+  message: string;
+  error?: string;
+  details?: Record<string, any>;
+}
+```
+
+### Error Code Enum
+Define error codes for client handling:
+
+```typescript
+// error-codes.enum.ts
+export enum ErrorCode {
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  DUPLICATE_EMAIL = 'DUPLICATE_EMAIL',
+}
+
+// Usage
+throw new ConflictException('Email already exists', ErrorCode.DUPLICATE_EMAIL);
+```
+
+### Logging
+Always log errors with context:
+
+```typescript
+// ✅ CORRECT
+try {
+  await this.processOrder(orderId);
+} catch (error) {
+  this.logger.error('Failed to process order', {
+    orderId,
+    error: error.message,
+    stack: error.stack,
+  });
+  throw new InternalServerErrorException('Order processing failed');
+}
+
+// ❌ WRONG - swallowed or generic logs
+catch (error) {
+  console.log('error');
+}
+```
+
+---
+
+## Security Middleware
+
+### Required Setup (main.ts)
+```typescript
+import helmet from 'helmet';
+import { rateLimit } from 'express-rate-limit';
+
+// Helmet - security headers
+app.use(helmet());
+
+// Rate limiting
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP
+  }),
+);
+
+// Cookie settings
+app.use(cookieParser());
+// In auth service, set HTTP-only cookies:
+response.cookie('accessToken', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 3600000, // 1 hour
+});
+```
+
+### CORS Configuration
+```typescript
+app.enableCors({
+  origin: process.env.FRONTEND_URL, // Never use '*' in production
+  credentials: true,
+});
+```
+
+---
+
+## Data Access (Prisma)
+
+### Prisma Client Lifecycle
+```typescript
+// ✅ CORRECT - singleton service
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
+
+// ❌ WRONG - creating new instances
+const prisma = new PrismaClient();
+```
+
+### Transactions
+```typescript
+// ✅ CORRECT - interactive transaction
+await this.prisma.$transaction(async (tx) => {
+  const user = await tx.user.create({ data: userData });
+  await tx.profile.create({ data: { userId: user.id, ...profileData } });
+  return user;
+});
+
+// ❌ WRONG - separate queries (race conditions)
+const user = await this.prisma.user.create({ data: userData });
+await this.prisma.profile.create({ data: { userId: user.id } });
+```
+
+### N+1 Prevention
+```typescript
+// ✅ CORRECT - use include/select
+const users = await this.prisma.user.findMany({
+  include: { posts: true },
+});
+
+// ❌ WRONG - N+1 query
+const users = await this.prisma.user.findMany();
+for (const user of users) {
+  user.posts = await this.prisma.post.findMany({ where: { userId: user.id } });
+}
+```
+
+---
+
+## Redis Usage
+
+### Key Naming Convention
+```typescript
+// Pattern: {domain}:{entity}:{id}:{field}
+const key = `user:${userId}:session`;
+const key = `cache:posts:list:${page}`;
+const key = `lock:order:${orderId}`;
+
+// ❌ WRONG - inconsistent naming
+const key = `user_${userId}_sess`;
+const key = `postsCache${page}`;
+```
+
+### TTL Management
+Always set TTL to prevent memory leaks:
+
+```typescript
+// ✅ CORRECT
+await this.redis.setex(`cache:user:${id}`, 3600, JSON.stringify(user));
+
+// ❌ WRONG - no expiration
+await this.redis.set(`cache:user:${id}`, JSON.stringify(user));
+```
+
+### Distributed Lock Pattern
+```typescript
+// ✅ CORRECT - ensure idempotency
+async function processPayment(orderId: string) {
+  const lockKey = `lock:payment:${orderId}`;
+  const acquired = await this.redis.set(lockKey, '1', 'EX', 30, 'NX');
+  
+  if (!acquired) {
+    throw new ConflictException('Payment already processing');
+  }
+
+  try {
+    // Process payment
+  } finally {
+    await this.redis.del(lockKey);
+  }
+}
+```
+
+---
+
+## Testing Strategy
+
+### Test Pyramid
+- **E2E (10%)**: Critical user flows (auth, checkout)
+- **Integration (40%)**: Module interactions, DB, Redis
+- **Unit (50%)**: Business logic in services
+
+### E2E Testing
+```typescript
+// ✅ CORRECT - test full flow
+describe('Auth E2E', () => {
+  it('should register, login, and access protected route', async () => {
+    // Register
+    const { body: user } = await request(app.getHttpServer())
+      .post('/api/v1/auth/register')
+      .send({ email, password })
+      .expect(201);
+
+    // Login
+    const { body: tokens } = await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .send({ email, password })
+      .expect(200);
+
+    // Access protected
+    await request(app.getHttpServer())
+      .get('/api/v1/users/me')
+      .set('Authorization', `Bearer ${tokens.accessToken}`)
+      .expect(200);
+  });
+});
+```
+
+### Integration Testing
+```typescript
+// ✅ CORRECT - test service with real DB
+describe('UsersService', () => {
+  let service: UsersService;
+  let prisma: PrismaService;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [UsersService, PrismaService],
+    }).compile();
+
+    service = module.get(UsersService);
+    prisma = module.get(PrismaService);
+  });
+
+  it('should create user and profile in transaction', async () => {
+    const user = await service.createWithProfile(userData);
+    
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { profile: true },
+    });
+
+    expect(dbUser.profile).toBeDefined();
+  });
+});
+```
+
+---
+
+## Code Review Checklist
+
+Before submitting:
+
+- [ ] DTOs use class-validator (no zod/joi mixing)
+- [ ] Business logic in service layer, not controller
+- [ ] Errors use NestJS built-in exceptions
+- [ ] Prisma transactions for multi-step operations
+- [ ] N+1 queries avoided with include/select
+- [ ] Redis keys follow naming convention
+- [ ] Redis keys have TTL set
+- [ ] Security middleware configured (helmet, rate limit)
+- [ ] Cookies are HTTP-only with secure flag
+- [ ] Integration tests cover service logic
+- [ ] E2E tests cover critical flows

@@ -1,0 +1,45 @@
+{
+  "name": "next-nest-turbo-boilerplate",
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "infra:start": "node scripts/infra-start.js",
+    "infra:stop": "docker compose down",
+    "infra:restart": "docker compose down && node scripts/infra-start.js",
+    "infra:logs": "docker compose logs -f",
+    "infra:ps": "docker compose ps",
+    "infra:health": "docker compose ps",
+    "dev": "turbo run dev --parallel",
+    "dev:all": "npm run infra:start && npm run dev",
+    "build": "turbo run build",
+    "start:dev": "turbo run start:dev",
+    "start:prod": "turbo run start:prod",
+    "lint": "turbo run lint --",
+    "lint:fix": "turbo run lint:fix --",
+    "test:unit": "turbo run test:unit",
+    "test:e2e": "turbo run test:e2e",
+    "test:unit:cov": "turbo run test:unit:cov",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "init": "node scripts/init.js",
+    "copilot:sync": "node scripts/copilot-sync.js",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "20.4.1",
+    "@commitlint/config-conventional": "20.4.1",
+    "husky": "9.1.7",
+    "inquirer": "^13.3.0",
+    "lint-staged": "16.2.7",
+    "prettier": "3.8.1",
+    "ts-node": "10.9.2",
+    "turbo": "2.8.7"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.9.2"
+}

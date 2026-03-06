@@ -1,0 +1,11 @@
+-- CreateTable (baseline migration - tables already exist from MikroORM)
+-- This migration marks the baseline state of the database
+-- No SQL needs to be executed as tables were created by MikroORM
+
+-- The dummy table structure (for reference):
+-- CREATE TABLE "dummy" (
+--     "id" UUID NOT NULL,
+--     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     "updated_at" TIMESTAMP NOT NULL,
+--     CONSTRAINT "dummy_pkey" PRIMARY KEY ("id")
+-- );

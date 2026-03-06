@@ -1,0 +1,40 @@
+# Infrastructure services for local development
+# Apps run on host via `npm run dev`, not in containers
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:17.5-bullseye
+    restart: always
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    environment:
+      POSTGRES_DB: '${POSTGRES_DB:-fullstack_vite_starter}'
+      POSTGRES_USER: '${POSTGRES_USER:-postgres}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-postgres}'
+      TZ: '${POSTGRES_TIMEZONE:-UTC}'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis cache/queue
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass}
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    restart: always
+    # Uncomment below for persistence (queue use cases):
+    # volumes:
+    #   - redis_data:/data
+
+volumes:
+  postgres_data:
+    name: fullstack_postgres_data
+  # Uncomment if enabling Redis persistence:
+  # redis_data:
+  #   name: fullstack_redis_data

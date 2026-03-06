@@ -1,0 +1,173 @@
+---
+description: Cross-cutting architectural contracts and red lines for fullstack consistency
+alwaysApply: true
+---
+
+# Fullstack Contracts & Red Lines
+
+This rule defines the unified boundaries and contracts that make this project a cohesive system.
+
+---
+
+## API Contract (REST)
+
+### Resource Naming
+- Use plural nouns for collections: `/api/v1/users`, `/api/v1/orders`
+- Use singular for specific resources: `/api/v1/users/:id`
+- Nested resources: `/api/v1/users/:userId/orders`
+
+### HTTP Method Semantics
+- `GET`: Read, idempotent, no side effects
+- `POST`: Create new resource
+- `PUT`: Full update (replace)
+- `PATCH`: Partial update
+- `DELETE`: Remove resource
+
+### Status Codes
+- `200`: Success with body
+- `201`: Created (with `Location` header)
+- `204`: Success without body
+- `400`: Bad request (validation error)
+- `401`: Unauthorized (missing/invalid auth)
+- `403`: Forbidden (insufficient permissions)
+- `404`: Not found
+- `409`: Conflict (duplicate, race condition)
+- `422`: Unprocessable entity (business logic error)
+- `500`: Internal server error
+
+### Error Structure
+All errors must follow this shape:
+
+```typescript
+{
+  statusCode: number;
+  message: string;
+  error?: string; // Error type name
+  details?: Record<string, any>; // Validation errors, etc.
+}
+```
+
+### Pagination & Filtering
+- Pagination: `?page=1&limit=20`
+- Sorting: `?sort=createdAt&order=desc`
+- Filtering: `?status=active&role=admin`
+
+Response format:
+```typescript
+{
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  }
+}
+```
+
+---
+
+## Type Contract
+
+### Single Source of Truth
+- All shared DTOs, entities, and enums live in `packages/shared`
+- **PROHIBITED**: Duplicating core types in frontend or backend
+
+### Type Organization
+```
+packages/shared/
+  types/
+    user.types.ts
+    order.types.ts
+  dtos/
+    create-user.dto.ts
+    update-order.dto.ts
+  enums/
+    user-role.enum.ts
+```
+
+### Import Pattern
+```typescript
+// ✅ CORRECT
+import { UserDto, CreateUserDto } from '@repo/shared';
+
+// ❌ WRONG - duplicate definition
+interface UserDto { ... }
+```
+
+---
+
+## Versioning & Naming
+
+### API Versioning
+- All endpoints start with `/api/v1`
+- Version in URL, not header
+- Breaking changes require new version: `/api/v2`
+
+### Path Naming
+- Lowercase with hyphens: `/user-profiles`, `/order-items`
+- No verbs in resource paths: `/users` not `/getUsers`
+- Actions via HTTP methods, not path: `DELETE /users/:id` not `/users/:id/delete`
+
+### Query Key Naming
+React Query keys must align with API resources:
+
+```typescript
+// ✅ CORRECT
+['users'] // GET /api/v1/users
+['users', userId] // GET /api/v1/users/:id
+['users', userId, 'orders'] // GET /api/v1/users/:id/orders
+
+// ❌ WRONG - inconsistent naming
+['getUserList']
+['user-detail', userId]
+```
+
+---
+
+## Engineering Red Lines
+
+### Lint & Format
+- **Run before commit**: `pnpm lint` and `pnpm format`
+- **No bypassing**: Do not use `--no-verify` on commits
+- Fix all linting errors, do not suppress with comments unless documented
+
+### Commit Standards
+- Follow conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`
+- Scope when relevant: `feat(auth):`, `fix(api):`
+- No WIP commits on main/develop branches
+
+### Pre-commit Hooks
+- **DO NOT BYPASS**: Hooks enforce quality gates
+- If hook fails, fix the issue, don't skip it
+- Use `git commit --amend` if hooks auto-fix files
+
+---
+
+## Security Red Lines
+
+### Authentication
+- Use HTTP-only cookies for session tokens (default)
+- If JWT: store in HTTP-only cookie, not localStorage
+- All auth endpoints under `/api/v1/auth`
+
+### CSRF Protection
+- Enable CSRF protection for state-changing operations (POST/PUT/PATCH/DELETE)
+- GET requests must be side-effect free
+- Use SameSite cookie attribute
+
+### Same-Origin Policy
+- API and frontend on same domain in production (or CORS configured explicitly)
+- No wildcard CORS origins (`*`) in production
+- Credentials included in cross-origin requests only when necessary
+
+### Input Validation
+- Validate all inputs on backend using DTOs with class-validator
+- Frontend validation is UX, not security
+- Sanitize before database operations
+
+---
+
+## Enforcement Principle
+
+These contracts are **non-negotiable boundaries**. Deviations fragment the system and create maintenance debt. If you need to deviate, document why and get alignment.

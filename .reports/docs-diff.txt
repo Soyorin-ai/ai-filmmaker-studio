@@ -1,0 +1,22 @@
+# Docs Update Diff Summary
+
+**Generated:** 2025-02-13
+
+## Created
+
+| File | Description |
+|------|-------------|
+| docs/CONTRIB.md | Development workflow, scripts table, env vars, testing |
+| docs/RUNBOOK.md | Deployment, CI/CD, monitoring, common issues, rollback |
+
+## Source of Truth
+
+- Root package.json scripts
+- apps/nestjs-backend/package.json scripts
+- apps/nextjs-frontend/package.json scripts
+- apps/nestjs-backend/.env.example
+- apps/nextjs-frontend/.env.example
+
+## Obsolete Documentation (90+ days)
+
+None identified. All project docs modified recently.

@@ -1,0 +1,544 @@
+---
+description: React frontend architecture and state management standards
+globs: apps/vite-frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Standards (React + Vite)
+
+Standards for organizing pages, state, and components in the React frontend.
+
+---
+
+## Routing (React Router)
+
+### Route Structure
+```typescript
+// ✅ CORRECT - clear hierarchy
+<Routes>
+  <Route element={<RootLayout />}>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/login" element={<LoginPage />} />
+    
+    {/* Protected routes */}
+    <Route element={<ProtectedRoute />}>
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+    </Route>
+  </Route>
+</Routes>
+
+// ❌ WRONG - flat structure, duplicated layout logic
+<Routes>
+  <Route path="/" element={<Layout><HomePage /></Layout>} />
+  <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
+</Routes>
+```
+
+### Layout Pattern
+```typescript
+// ✅ CORRECT - nested layouts with Outlet
+function RootLayout() {
+  return (
+    <div>
+      <Header />
+      <Outlet /> {/* Child routes render here */}
+      <Footer />
+    </div>
+  );
+}
+
+// Dashboard has its own sidebar layout
+function DashboardLayout() {
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main>
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+```
+
+### Protected Routes
+```typescript
+// ✅ CORRECT - auth guard component
+function ProtectedRoute() {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <Outlet />;
+}
+
+// ❌ WRONG - auth check in every page
+function DashboardPage() {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  // ... rest of component
+}
+```
+
+---
+
+## React Query
+
+### Query Key Convention
+Must match API resource structure:
+
+```typescript
+// ✅ CORRECT - aligns with /api/v1/users
+export const userKeys = {
+  all: ['users'] as const,
+  lists: () => [...userKeys.all, 'list'] as const,
+  list: (filters: UserFilters) => [...userKeys.lists(), filters] as const,
+  details: () => [...userKeys.all, 'detail'] as const,
+  detail: (id: string) => [...userKeys.details(), id] as const,
+};
+
+// Usage
+useQuery({ queryKey: userKeys.detail(userId), queryFn: () => fetchUser(userId) });
+
+// ❌ WRONG - inconsistent naming
+useQuery({ queryKey: ['getUserDetail', userId], ... });
+useQuery({ queryKey: ['user-info', userId], ... });
+```
+
+### Stale Time Strategy
+```typescript
+// ✅ CORRECT - configure per query type
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes default
+      retry: 1,
+    },
+  },
+});
+
+// Override for specific queries
+useQuery({
+  queryKey: userKeys.detail(userId),
+  queryFn: fetchUser,
+  staleTime: 10 * 60 * 1000, // 10 minutes for user profile
+});
+
+// Real-time data - minimal stale time
+useQuery({
+  queryKey: ['notifications'],
+  queryFn: fetchNotifications,
+  staleTime: 30 * 1000, // 30 seconds
+});
+```
+
+### Error Boundary Integration
+```typescript
+// ✅ CORRECT - query errors caught by boundary
+function UsersPage() {
+  const { data: users } = useQuery({
+    queryKey: userKeys.lists(),
+    queryFn: fetchUsers,
+    throwOnError: true, // Throw to error boundary
+  });
+
+  return <UserList users={users} />;
+}
+
+// Wrap with error boundary
+<ErrorBoundary fallback={<ErrorFallback />}>
+  <UsersPage />
+</ErrorBoundary>
+
+// ❌ WRONG - handling errors in every component
+function UsersPage() {
+  const { data, error, isError } = useQuery(...);
+  if (isError) return <div>Error: {error.message}</div>;
+  // ...
+}
+```
+
+### Mutation Conventions
+```typescript
+// ✅ CORRECT - invalidate related queries
+const createUserMutation = useMutation({
+  mutationFn: (data: CreateUserDto) => api.createUser(data),
+  onSuccess: () => {
+    // Invalidate user list to refetch
+    queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+  },
+});
+
+// Optimistic updates for better UX
+const updateUserMutation = useMutation({
+  mutationFn: ({ id, data }: UpdateUserParams) => api.updateUser(id, data),
+  onMutate: async ({ id, data }) => {
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries({ queryKey: userKeys.detail(id) });
+    
+    // Snapshot previous value
+    const previous = queryClient.getQueryData(userKeys.detail(id));
+    
+    // Optimistically update
+    queryClient.setQueryData(userKeys.detail(id), { ...previous, ...data });
+    
+    return { previous };
+  },
+  onError: (err, variables, context) => {
+    // Rollback on error
+    queryClient.setQueryData(userKeys.detail(variables.id), context?.previous);
+  },
+});
+
+// ❌ WRONG - no cache invalidation
+const createUserMutation = useMutation({
+  mutationFn: createUser,
+  // Missing onSuccess - stale data in cache
+});
+```
+
+---
+
+## Zustand (Client State Only)
+
+### Allowed Use Cases
+- UI state: modals, sidebars, theme
+- Form state across steps
+- User preferences (local)
+- Temporary filters/selections
+
+```typescript
+// ✅ CORRECT - client-side UI state
+interface UIStore {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+}
+
+export const useUIStore = create<UIStore>((set) => ({
+  isSidebarOpen: true,
+  toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+  theme: 'light',
+  setTheme: (theme) => set({ theme }),
+}));
+```
+
+### Prohibited Use Cases
+**DO NOT cache server data in Zustand. Use React Query.**
+
+```typescript
+// ❌ WRONG - caching API response in Zustand
+interface UserStore {
+  users: User[];
+  fetchUsers: () => Promise<void>;
+}
+
+// This duplicates React Query functionality
+export const useUserStore = create<UserStore>((set) => ({
+  users: [],
+  fetchUsers: async () => {
+    const users = await api.getUsers();
+    set({ users });
+  },
+}));
+
+// ✅ CORRECT - use React Query instead
+const { data: users } = useQuery({
+  queryKey: userKeys.lists(),
+  queryFn: api.getUsers,
+});
+```
+
+---
+
+## Zod Validation
+
+### Form Validation
+```typescript
+// ✅ CORRECT - validate form input
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+function LoginForm() {
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data);
+  };
+
+  return <form onSubmit={form.handleSubmit(onSubmit)}>...</form>;
+}
+```
+
+### Response Validation (Critical Endpoints)
+```typescript
+// ✅ CORRECT - validate untrusted/critical responses
+const userResponseSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  role: z.enum(['admin', 'user']),
+});
+
+async function fetchUser(id: string): Promise<User> {
+  const response = await api.get(`/users/${id}`);
+  // Validate at boundary
+  return userResponseSchema.parse(response.data);
+}
+
+// ❌ WRONG - no validation, trust backend blindly
+async function fetchUser(id: string): Promise<User> {
+  const response = await api.get(`/users/${id}`);
+  return response.data; // What if structure changed?
+}
+```
+
+### Validation Boundary
+- **Always validate**: User input, external API responses
+- **Optional validate**: Internal API responses (if backend is trusted + typed via `@repo/shared`)
+
+---
+
+## i18n (Internationalization)
+
+### Key Naming Convention
+```typescript
+// ✅ CORRECT - dot notation, descriptive
+{
+  "common.buttons.submit": "Submit",
+  "common.buttons.cancel": "Cancel",
+  "auth.login.title": "Sign In",
+  "auth.login.emailLabel": "Email Address",
+  "errors.validation.required": "This field is required",
+  "dashboard.stats.totalUsers": "Total Users"
+}
+
+// ❌ WRONG - inconsistent, unclear
+{
+  "submit_btn": "Submit",
+  "loginTitle": "Sign In",
+  "err1": "This field is required"
+}
+```
+
+### Namespace Organization
+```typescript
+// ✅ CORRECT - split by domain
+import { useTranslation } from 'react-i18next';
+
+function LoginPage() {
+  const { t } = useTranslation('auth'); // Load auth namespace
+  return <h1>{t('login.title')}</h1>;
+}
+
+// Namespace structure:
+// i18n/en/common.json
+// i18n/en/auth.json
+// i18n/en/dashboard.json
+
+// ❌ WRONG - single massive file
+// i18n/en/translation.json (2000 keys)
+```
+
+### Interpolation & Pluralization
+```typescript
+// ✅ CORRECT - use i18n features
+t('welcome.greeting', { name: user.name }); // "Welcome, John!"
+t('items.count', { count: items.length }); // Handles plural forms
+
+// In translation file:
+{
+  "welcome.greeting": "Welcome, {{name}}!",
+  "items.count_one": "{{count}} item",
+  "items.count_other": "{{count}} items"
+}
+```
+
+---
+
+## Helmet (Page Metadata)
+
+### Centralized Title Strategy
+```typescript
+// ✅ CORRECT - use Helmet in each page
+import { Helmet } from 'react-helmet-async';
+
+function DashboardPage() {
+  return (
+    <>
+      <Helmet>
+        <title>Dashboard - MyApp</title>
+        <meta name="description" content="User dashboard" />
+      </Helmet>
+      <div>Dashboard content</div>
+    </>
+  );
+}
+
+// Root provides default
+function App() {
+  return (
+    <HelmetProvider>
+      <Helmet
+        defaultTitle="MyApp"
+        titleTemplate="%s - MyApp"
+      />
+      <Routes>...</Routes>
+    </HelmetProvider>
+  );
+}
+
+// ❌ WRONG - hardcoded in index.html only
+// No dynamic title/meta per route
+```
+
+### SEO Metadata Template
+```typescript
+// ✅ CORRECT - reusable SEO component
+interface SEOProps {
+  title: string;
+  description: string;
+  image?: string;
+  url?: string;
+}
+
+function SEO({ title, description, image, url }: SEOProps) {
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      
+      {/* Open Graph */}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      {image && <meta property="og:image" content={image} />}
+      {url && <meta property="og:url" content={url} />}
+      
+      {/* Twitter Card */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+    </Helmet>
+  );
+}
+```
+
+---
+
+## Component Layers
+
+### Directory Structure
+```
+src/
+  components/
+    ui/              # Pure presentational (Button, Input, Card)
+      Button.tsx
+      Input.tsx
+    common/          # Shared logic components (ErrorBoundary, ProtectedRoute)
+      ErrorBoundary.tsx
+      ProtectedRoute.tsx
+  features/          # Feature-specific components
+    auth/
+      LoginForm.tsx
+      RegisterForm.tsx
+    users/
+      UserList.tsx
+      UserCard.tsx
+  pages/             # Route pages (thin, compose features)
+    HomePage.tsx
+    DashboardPage.tsx
+    LoginPage.tsx
+```
+
+### Layer Rules
+
+**ui/**: Pure presentation, no business logic
+```typescript
+// ✅ CORRECT
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary';
+}
+
+export function Button({ children, onClick, variant = 'primary' }: ButtonProps) {
+  return <button onClick={onClick} className={styles[variant]}>{children}</button>;
+}
+
+// ❌ WRONG - API calls in UI component
+export function Button() {
+  const { data } = useQuery({ queryKey: ['config'], queryFn: fetchConfig });
+  // ...
+}
+```
+
+**features/**: Domain-specific, can use hooks/queries
+```typescript
+// ✅ CORRECT
+export function UserList() {
+  const { data: users } = useQuery({
+    queryKey: userKeys.lists(),
+    queryFn: fetchUsers,
+  });
+
+  return (
+    <div>
+      {users.map(user => <UserCard key={user.id} user={user} />)}
+    </div>
+  );
+}
+```
+
+**pages/**: Orchestrate features, handle routing
+```typescript
+// ✅ CORRECT - thin page, composes features
+export function DashboardPage() {
+  return (
+    <>
+      <SEO title="Dashboard" description="User dashboard" />
+      <DashboardLayout>
+        <StatsOverview />
+        <RecentActivity />
+      </DashboardLayout>
+    </>
+  );
+}
+
+// ❌ WRONG - business logic in page
+export function DashboardPage() {
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    fetchUsers().then(setUsers);
+  }, []);
+  // Too much logic here, should be in feature component
+}
+```
+
+---
+
+## Code Review Checklist
+
+Before submitting:
+
+- [ ] Routes use layout + `<Outlet />` pattern
+- [ ] Protected routes use guard component
+- [ ] React Query keys follow `userKeys.detail(id)` convention
+- [ ] Mutations invalidate related queries
+- [ ] Zustand only for client state (no server data)
+- [ ] Forms validated with Zod + react-hook-form
+- [ ] i18n keys use dot notation (e.g., `auth.login.title`)
+- [ ] Each page has `<Helmet>` with title/meta
+- [ ] Components in correct layer (ui/features/pages)
+- [ ] UI components have no business logic

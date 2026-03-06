@@ -1,0 +1,20 @@
+---
+description: Lint runs on pre-commit only; do not call ReadLints after every edit to save tokens
+alwaysApply: true
+---
+
+# Lint on Push Only
+
+Do **not** call `ReadLints` after code edits in normal flow. Lint is enforced at commit time via pre-commit (lint-staged).
+
+## When to Use ReadLints
+
+- When the user explicitly asks to check for lint errors.
+- When fixing a reported build or lint failure.
+
+## When Not to Use ReadLints
+
+- After routine code edits or feature implementation.
+- To "verify" or "check" edits unless the user requested it.
+
+Lint and format run automatically on staged files before commit; no need to run them in-session to save tokens.

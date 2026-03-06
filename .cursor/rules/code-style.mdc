@@ -1,0 +1,325 @@
+---
+description: Universal coding style and quality standards
+alwaysApply: true
+---
+
+# Code Style & Quality
+
+Universal standards that apply across frontend and backend.
+
+---
+
+## Immutability (CRITICAL)
+
+Always create new objects/arrays. Never mutate existing data.
+
+```typescript
+// ❌ WRONG - mutation
+function updateUser(user: User, name: string) {
+  user.name = name; // Mutates input!
+  return user;
+}
+
+const items = [1, 2, 3];
+items.push(4); // Mutates array!
+
+// ✅ CORRECT - immutable patterns
+function updateUser(user: User, name: string): User {
+  return { ...user, name };
+}
+
+const items = [1, 2, 3];
+const newItems = [...items, 4];
+
+// Array operations
+const filtered = items.filter(x => x > 1); // ✅
+const mapped = items.map(x => x * 2); // ✅
+```
+
+### Why It Matters
+- Prevents bugs from shared references
+- Enables React to detect changes
+- Required for Redux/Zustand state updates
+- Makes code predictable
+
+---
+
+## File Organization
+
+### Size Limits
+- **Target**: 200-400 lines per file
+- **Maximum**: 800 lines
+- **Functions**: < 50 lines each
+
+### Split Strategy
+```typescript
+// ❌ WRONG - everything in one file (1200 lines)
+// UserPage.tsx
+export function UserPage() {
+  // 50 lines of component logic
+  // 100 lines of form handling
+  // 200 lines of validation logic
+  // 150 lines of API calls
+  // ...
+}
+
+// ✅ CORRECT - split by responsibility
+// UserPage.tsx (120 lines)
+import { UserForm } from './UserForm';
+import { useUserActions } from './hooks/useUserActions';
+
+export function UserPage() {
+  const { handleSubmit, handleDelete } = useUserActions();
+  return <UserForm onSubmit={handleSubmit} />;
+}
+
+// UserForm.tsx (150 lines)
+// hooks/useUserActions.ts (80 lines)
+// api/users.api.ts (100 lines)
+// validation/user.schema.ts (60 lines)
+```
+
+### Organization Pattern
+Organize by **feature/domain**, not by type:
+
+```
+// ✅ CORRECT - by feature
+features/
+  users/
+    UserList.tsx
+    UserForm.tsx
+    hooks/
+      useUserActions.ts
+    api/
+      users.api.ts
+    types/
+      user.types.ts
+
+// ❌ WRONG - by type
+components/
+  UserList.tsx
+  UserForm.tsx
+hooks/
+  useUserActions.ts
+api/
+  users.api.ts
+```
+
+---
+
+## Nesting Depth
+
+**Maximum nesting: 4 levels**
+
+```typescript
+// ❌ WRONG - deep nesting (6 levels)
+function processData(data: Data[]) {
+  if (data) {
+    for (const item of data) {
+      if (item.isActive) {
+        if (item.user) {
+          if (item.user.role === 'admin') {
+            if (item.permissions.includes('write')) {
+              // Level 6!
+              doSomething(item);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ✅ CORRECT - early returns + extract functions
+function processData(data: Data[]) {
+  if (!data) return;
+  
+  const activeItems = data.filter(item => item.isActive);
+  const adminItems = activeItems.filter(isAdmin);
+  
+  adminItems.forEach(processAdminItem);
+}
+
+function isAdmin(item: Data): boolean {
+  return item.user?.role === 'admin';
+}
+
+function processAdminItem(item: Data) {
+  if (!item.permissions.includes('write')) return;
+  doSomething(item);
+}
+```
+
+---
+
+## Error Handling
+
+### Always Provide Context
+```typescript
+// ❌ WRONG - silent failure or generic error
+try {
+  await deleteUser(userId);
+} catch (error) {
+  console.error(error); // Where? Which user?
+}
+
+// ❌ WRONG - losing error context
+try {
+  await deleteUser(userId);
+} catch (error) {
+  throw new Error('Failed'); // Lost original error!
+}
+
+// ✅ CORRECT - context + cause chain
+try {
+  await deleteUser(userId);
+} catch (error) {
+  logger.error('Failed to delete user', {
+    userId,
+    error: error instanceof Error ? error.message : 'Unknown error',
+  });
+  throw new Error(`Unable to delete user ${userId}`, { cause: error });
+}
+```
+
+### Frontend Error Boundaries
+```typescript
+// ✅ CORRECT - throw to error boundary for critical errors
+function UserProfile() {
+  const { data: user } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetchUser(userId),
+    throwOnError: true, // Let error boundary handle it
+  });
+  
+  return <Profile user={user} />;
+}
+```
+
+---
+
+## Naming Conventions
+
+### Be Explicit
+```typescript
+// ❌ WRONG - unclear abbreviations
+const usrs = await getUsrs();
+const btn = document.querySelector('.btn');
+function calc(a, b) { return a + b; }
+
+// ✅ CORRECT - descriptive names
+const users = await getUsers();
+const submitButton = document.querySelector('.submit-button');
+function calculateTotal(price: number, tax: number): number {
+  return price + tax;
+}
+```
+
+### Naming Patterns
+- **Boolean**: `isActive`, `hasPermission`, `canEdit`
+- **Arrays**: Plural nouns: `users`, `items`, `orders`
+- **Functions**: Verb prefix: `getUser`, `createOrder`, `validateInput`
+- **Event handlers**: `handleClick`, `handleSubmit`, `onUserCreate`
+- **Constants**: `UPPER_SNAKE_CASE` for true constants
+
+---
+
+## No Magic Values
+
+```typescript
+// ❌ WRONG - hardcoded values
+if (user.role === 3) { // What is 3?
+  setTimeout(() => retry(), 5000); // Why 5000?
+  const items = data.slice(0, 20); // Why 20?
+}
+
+// ✅ CORRECT - named constants
+const USER_ROLE = {
+  GUEST: 1,
+  USER: 2,
+  ADMIN: 3,
+} as const;
+
+const RETRY_DELAY_MS = 5000;
+const DEFAULT_PAGE_SIZE = 20;
+
+if (user.role === USER_ROLE.ADMIN) {
+  setTimeout(() => retry(), RETRY_DELAY_MS);
+  const items = data.slice(0, DEFAULT_PAGE_SIZE);
+}
+```
+
+---
+
+## Type Safety
+
+### Avoid `any`
+```typescript
+// ❌ WRONG - loses type safety
+function processData(data: any) {
+  return data.items.map((item: any) => item.name);
+}
+
+// ✅ CORRECT - explicit types
+interface DataResponse {
+  items: Array<{ id: string; name: string }>;
+}
+
+function processData(data: DataResponse): string[] {
+  return data.items.map(item => item.name);
+}
+```
+
+### Use Type Guards
+```typescript
+// ✅ CORRECT - type narrowing
+function processValue(value: string | number) {
+  if (typeof value === 'string') {
+    return value.toUpperCase(); // TS knows it's string
+  }
+  return value.toFixed(2); // TS knows it's number
+}
+```
+
+---
+
+## Code Quality Checklist
+
+Before committing:
+
+- [ ] No mutations - immutable patterns used
+- [ ] File size < 800 lines (ideally 200-400)
+- [ ] Functions < 50 lines
+- [ ] Nesting depth ≤ 4 levels
+- [ ] Errors have context and are logged
+- [ ] No `console.log` statements (use logger)
+- [ ] No magic numbers/strings (use constants)
+- [ ] No hardcoded values (use env vars/config)
+- [ ] Variables/functions have descriptive names
+- [ ] `any` type avoided (use proper types)
+- [ ] Code is self-documenting (clear intent)
+
+---
+
+## When to Comment
+
+```typescript
+// ❌ WRONG - obvious comments
+// Increment counter
+counter++;
+
+// Loop through users
+users.forEach(user => { ... });
+
+// ✅ CORRECT - explain WHY, not WHAT
+// Delay prevents rate limiting (API allows 100 req/min)
+await sleep(600);
+
+// Safari requires explicit passive: false for touch events
+element.addEventListener('touchstart', handler, { passive: false });
+
+// TODO: Remove after 2026-03-01 when legacy API is deprecated
+if (useLegacyApi) { ... }
+```
+
+**Rule**: Code should explain WHAT. Comments explain WHY (business rules, workarounds, non-obvious decisions).

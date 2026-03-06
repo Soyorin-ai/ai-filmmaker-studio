@@ -1,0 +1,45 @@
+{
+  "name": "@next-nest-turbo-auth-boilerplate/db",
+  "version": "0.0.1",
+  "scripts": {
+    "start:dev": "tsc --watch",
+    "build": "prisma generate && tsc",
+    "lint": "xo",
+    "lint:fix": "xo --fix",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:studio": "prisma studio",
+    "migrate:dev": "node --import ./scripts/load-env.mjs -e \"require('child_process').execSync('npx prisma migrate dev', {stdio:'inherit', env:process.env})\"",
+    "migrate:deploy": "node --import ./scripts/load-env.mjs -e \"require('child_process').execSync('npx prisma migrate deploy', {stdio:'inherit', env:process.env})\"",
+    "migrate:status": "node --import ./scripts/load-env.mjs -e \"require('child_process').execSync('npx prisma migrate status', {stdio:'inherit', env:process.env})\"",
+    "db:seed": "node --import ./scripts/load-env.mjs -e \"require('child_process').execSync('npx prisma db seed', {stdio:'inherit', env:process.env})\""
+  },
+  "prisma": {
+    "scripts": {
+      "seed": "node --import ./scripts/load-env.mjs -e \"require('child_process').execSync('npx prisma db seed', {stdio:'inherit', env:process.env})\""
+    },
+    "seed": "tsx prisma/seed.ts"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@prisma/client": "6.2.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "bcrypt": "6.0.0",
+    "dotenv": "17.3.1",
+    "prisma": "6.2.0",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "xo": "1.2.3"
+  }
+}

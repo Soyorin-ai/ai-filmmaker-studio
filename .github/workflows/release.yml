@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  release:
+    name: Run Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: '0'
+
+      - name: Get next version
+        id: get_next_version
+        uses: thenativeweb/get-next-version@2.7.1
+
+      - name: Create new version
+        if: ${{ steps.get_next_version.outputs.hasNextVersion == 'true' }}
+        run: |
+          git tag v${{ steps.get_next_version.outputs.version }}
+          git push origin v${{ steps.get_next_version.outputs.version }}

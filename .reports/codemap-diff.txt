@@ -1,0 +1,21 @@
+# Codemap diff report
+
+**Generated:** 2026-02-13
+
+## Summary
+
+| File               | Est. diff | Notes                                      |
+|--------------------|-----------|--------------------------------------------|
+| architecture.md    | ~25%      | Frontend app name, deps, build outputs     |
+| backend.md         | ~5%       | Timestamp only                             |
+| frontend.md        | ~95%      | Full rewrite: Next.js → Vite + React       |
+| data.md            | ~15%      | Timestamp, minor wording                   |
+
+**Overall:** Frontend codemap changed >30% due to migration (Next.js → Vite, React Router, react-i18next, en/zh). All four codemaps updated with current structure and freshness timestamp.
+
+## Changes applied
+
+- architecture.md: vite-frontend, dist/** only, updated Frontend deps
+- backend.md: timestamp
+- frontend.md: entry (main.tsx, index.html), router, pages, i18n (config, LanguageSync, en/zh), providers, structure
+- data.md: timestamp, Prisma models list
