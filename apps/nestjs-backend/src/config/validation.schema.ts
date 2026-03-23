@@ -23,6 +23,10 @@ const validationSchemaMap: Record<ConfigKey, Joi.Schema> = {
 
   [ConfigKey.JWT_SECRET]: Joi.string().min(32).required(),
   [ConfigKey.JWT_EXPIRES_IN]: Joi.string().default('7d'),
+
+  // AI Service
+  [ConfigKey.DMX_API_KEY]: Joi.string().optional(),
+  [ConfigKey.DMX_API_BASE_URL]: Joi.string().uri().optional().default('https://www.dmxapi.cn'),
 };
 
 export default Joi.object(validationSchemaMap);

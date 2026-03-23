@@ -22,6 +22,10 @@ const appConfig = (): Record<ConfigKey, unknown> => ({
 
   [ConfigKey.JWT_SECRET]: process.env.JWT_SECRET,
   [ConfigKey.JWT_EXPIRES_IN]: process.env.JWT_EXPIRES_IN ?? '7d',
+
+  // AI Service
+  [ConfigKey.DMX_API_KEY]: process.env.DMX_API_KEY,
+  [ConfigKey.DMX_API_BASE_URL]: process.env.DMX_API_BASE_URL ?? 'https://www.dmxapi.cn',
 });
 
 export default appConfig;

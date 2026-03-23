@@ -10,12 +10,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3091,
     host: true,
     strictPort: true,
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:4000',
+        target: 'http://localhost:4090',
         changeOrigin: true,
       },
     },

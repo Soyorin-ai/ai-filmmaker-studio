@@ -20,4 +20,8 @@ export enum ConfigKey {
 
   JWT_SECRET = 'JWT_SECRET',
   JWT_EXPIRES_IN = 'JWT_EXPIRES_IN',
+
+  // AI Service
+  DMX_API_KEY = 'DMX_API_KEY',
+  DMX_API_BASE_URL = 'DMX_API_BASE_URL',
 }

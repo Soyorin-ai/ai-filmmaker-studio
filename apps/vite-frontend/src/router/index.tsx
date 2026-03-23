@@ -4,6 +4,11 @@ import {ErrorBoundary} from '../pages/ErrorBoundary.tsx';
 import {NotFound} from '../pages/NotFound.tsx';
 import {LoginPage} from '../pages/auth/LoginPage.tsx';
 import {RegisterPage} from '../pages/auth/RegisterPage.tsx';
+import {ImagePage} from '../pages/create/ImagePage.tsx';
+import {VideoPage} from '../pages/create/VideoPage.tsx';
+import {AssetsPage} from '../pages/assets/AssetsPage.tsx';
+import {ProjectsPage} from '../pages/projects/ProjectsPage.tsx';
+import {ProjectDetailPage} from '../pages/projects/ProjectDetailPage.tsx';
 import {MainLayout} from '@/layouts/MainLayout.tsx';
 import {BareLayout} from '@/layouts/BareLayout.tsx';
 import {ProvidersLayout} from '@/layouts/ProvidersLayout.tsx';
@@ -20,7 +25,14 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <MainLayout />,
-        children: [{index: true, element: <Home />}],
+        children: [
+          {index: true, element: <Home />},
+          {path: 'create/image', element: <ImagePage />},
+          {path: 'create/video', element: <VideoPage />},
+          {path: 'assets', element: <AssetsPage />},
+          {path: 'projects', element: <ProjectsPage />},
+          {path: 'projects/:id', element: <ProjectDetailPage />},
+        ],
       },
       {
         element: <BareLayout />,

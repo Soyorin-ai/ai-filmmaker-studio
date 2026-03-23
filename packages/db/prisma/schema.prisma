@@ -17,18 +17,441 @@ model mikro_orm_migrations {
   @@ignore
 }
 
+// ============================================
+// Enums
+// ============================================
+
 enum UserRole {
-  USER
-  ADMIN
+  USER        // 普通用户
+  CREATOR     // 创作者（付费用户）
+  ENTERPRISE  // 企业用户
+  ADMIN       // 管理员
 }
 
-model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  role         UserRole @default(USER)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp()
+enum UserStatus {
+  ACTIVE      // 正常
+  SUSPENDED   // 暂停
+  BANNED      // 封禁
+}
 
+enum PlanType {
+  FREE        // 免费版
+  BASIC       // 基础版
+  PRO         // 专业版
+  ENTERPRISE  // 企业版
+}
+
+enum SubscriptionStatus {
+  ACTIVE      // 活跃
+  PAST_DUE    // 逾期
+  CANCELLED   // 已取消
+  EXPIRED     // 已过期
+}
+
+enum ProjectStatus {
+  DRAFT       // 草稿
+  IN_PROGRESS // 进行中
+  COMPLETED   // 已完成
+  ARCHIVED    // 已归档
+}
+
+enum AssetType {
+  IMAGE       // 图片
+  VIDEO       // 视频
+  AUDIO       // 音频
+}
+
+enum AssetSource {
+  GENERATE    // AI生成
+  UPLOAD      // 用户上传
+  EDIT        // 编辑产生
+  IMPORT      // 外部导入
+}
+
+enum TaskType {
+  // 图片生成
+  IMAGE_GEN_TEXT       // 文生图
+  IMAGE_GEN_IMAGE      // 图生图
+
+  // 视频生成
+  VIDEO_GEN_TEXT       // 文生视频
+  VIDEO_GEN_IMAGE      // 图生视频
+  VIDEO_GEN_FRAMES     // 首尾帧生视频
+
+  // 编辑
+  IMAGE_EDIT           // 图片编辑
+  VIDEO_EDIT           // 视频编辑
+  VIDEO_MERGE          // 视频合并
+
+  // 导出
+  PROJECT_EXPORT       // 项目导出
+}
+
+enum TaskStatus {
+  PENDING     // 等待中
+  QUEUED      // 已入队
+  RUNNING     // 运行中
+  COMPLETED   // 已完成
+  FAILED      // 失败
+  CANCELLED   // 已取消
+  EXPIRED     // 已过期
+}
+
+enum ExportStatus {
+  PENDING     // 等待中
+  PROCESSING  // 处理中
+  COMPLETED   // 已完成
+  FAILED      // 失败
+  EXPIRED     // 已过期
+}
+
+// ============================================
+// Models
+// ============================================
+
+/// 用户表
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  phone         String?   @unique
+  passwordHash  String    @map("password_hash")
+  nickname      String
+  avatar        String?
+  bio           String?   @db.Text
+
+  // 角色
+  role          UserRole  @default(USER)
+
+  // 状态
+  status        UserStatus @default(ACTIVE)
+  emailVerified DateTime?  @map("email_verified")
+  phoneVerified DateTime?  @map("phone_verified")
+
+  // 关联
+  quota         Quota?
+  subscriptions Subscription[]
+  projects      Project[]
+  assets        Asset[]
+  tasks         Task[]
+  apiKeys       ApiKey[]
+  webhooks      Webhook[]
+
+  // 时间戳
+  lastLoginAt   DateTime?  @map("last_login_at")
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt     DateTime?  @map("deleted_at")
+
+  @@index([email])
+  @@index([phone])
+  @@index([createdAt])
   @@map("users")
+}
+
+/// 额度表
+model Quota {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @unique @map("user_id") @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 图片额度
+  imageCount      Int       @default(10)  @map("image_count")    // 剩余图片生成次数
+  imageUsed       Int       @default(0)   @map("image_used")     // 已使用次数
+  imageTotal      Int       @default(10)  @map("image_total")    // 总额度
+
+  // 视频额度（按秒计算）
+  videoSeconds    Int       @default(30)  @map("video_seconds")  // 剩余视频秒数
+  videoUsed       Int       @default(0)   @map("video_used")     // 已使用秒数
+  videoTotal      Int       @default(30)  @map("video_total")    // 总秒数
+
+  // 存储额度 (使用 BigInt 支持大文件)
+  storageBytes    BigInt    @default(1073741824) @map("storage_bytes")    // 剩余存储空间 (1GB)
+  storageUsed     BigInt    @default(0)          @map("storage_used")     // 已使用空间
+  storageTotal    BigInt    @default(1073741824) @map("storage_total")    // 总空间
+
+  // 并发限制
+  maxConcurrent   Int       @default(1)   @map("max_concurrent")  // 最大并发任务数
+
+  // 订阅相关
+  planType        PlanType  @default(FREE) @map("plan_type")
+  expiresAt       DateTime? @map("expires_at")              // 过期时间
+
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("quotas")
+}
+
+/// 订阅表
+model Subscription {
+  id              String            @id @default(uuid()) @db.Uuid
+  userId          String            @map("user_id") @db.Uuid
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 订阅计划
+  planId          String            @map("plan_id")
+  planName        String            @map("plan_name")
+  planType        PlanType          @map("plan_type")
+
+  // 订阅状态
+  status          SubscriptionStatus @default(ACTIVE)
+
+  // 时间
+  startDate       DateTime          @map("start_date")
+  endDate         DateTime          @map("end_date")
+  cancelledAt     DateTime?         @map("cancelled_at")
+
+  // 付款信息
+  paymentMethod   String?           @map("payment_method") // alipay, wechat, stripe
+  paymentId       String?           @map("payment_id")     // 第三方支付ID
+  amount          Decimal           @db.Decimal(10, 2)
+  currency        String            @default("CNY")
+
+  // 自动续费
+  autoRenew       Boolean           @default(false) @map("auto_renew")
+  nextBillingDate DateTime?         @map("next_billing_date")
+
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt       DateTime          @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
+  @@map("subscriptions")
+}
+
+/// 项目表
+model Project {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 基本信息
+  name          String
+  description   String?       @db.Text
+  cover         String?       // 封面图URL
+
+  // 状态
+  status        ProjectStatus @default(DRAFT)
+
+  // 工作流数据
+  workflow      Json?         // React Flow 格式的工作流定义
+  workflowVersion Int         @default(1) @map("workflow_version")
+
+  // 时间线数据
+  timeline      Json?         // 时间线数据
+  duration      Int           @default(0)  // 总时长（秒）
+
+  // 统计
+  assetCount    Int           @default(0) @map("asset_count")
+  taskCount     Int           @default(0) @map("task_count")
+
+  // 设置
+  settings      Json?
+
+  // 关联
+  assets        Asset[]
+  tasks         Task[]
+  exports       Export[]
+
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt     DateTime?     @map("deleted_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+/// 素材表
+model Asset {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 所属项目（可选）
+  projectId     String?     @map("project_id") @db.Uuid
+  project       Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // 素材类型
+  type          AssetType
+
+  // 基本信息
+  name          String
+  originalName  String?     @map("original_name") // 原始文件名
+
+  // 存储信息
+  url           String      // OSS URL
+  thumbnail     String?     // 缩略图 URL
+  fileSize      BigInt      @map("file_size") // 文件大小（字节）
+  mimeType      String?     @map("mime_type") // MIME类型
+
+  // 元数据
+  metadata      Json?       // 宽高、时长、帧率等
+
+  // 来源
+  source        AssetSource
+
+  // 关联 - 产生此素材的任务（如果是 AI 生成的）
+  task          Task?       @relation("TaskToAsset")
+
+  // 标签
+  tags          String[]    // 用户自定义标签
+
+  // 状态
+  isFavorite    Boolean     @default(false) @map("is_favorite")
+  isPublic      Boolean     @default(false) @map("is_public") // 是否公开
+
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp()
+  deletedAt     DateTime?   @map("deleted_at")
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([type])
+  @@index([source])
+  @@index([createdAt])
+  @@map("assets")
+}
+
+/// 任务表
+model Task {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 所属项目（可选）
+  projectId     String?     @map("project_id") @db.Uuid
+  project       Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // 任务类型
+  type          TaskType
+
+  // 状态
+  status        TaskStatus  @default(PENDING)
+  progress      Int         @default(0)  // 0-100
+
+  // 参数
+  params        Json        // 任务输入参数
+
+  // 结果
+  result        Json?       // 任务输出结果
+  error         String?     @db.Text
+
+  // 资源消耗
+  costImage     Int         @default(0) @map("cost_image")  // 消耗图片次数
+  costVideo     Int         @default(0) @map("cost_video")  // 消耗视频秒数
+
+  // 关联 - 任务产生的素材
+  asset         Asset?      @relation("TaskToAsset", fields: [assetId], references: [id], onDelete: SetNull)
+  assetId       String?     @unique @map("asset_id") @db.Uuid
+
+  // 时间
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp()
+  startedAt     DateTime?   @map("started_at")
+  completedAt   DateTime?   @map("completed_at")
+  expiresAt     DateTime?   @map("expires_at") // 任务过期时间
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("tasks")
+}
+
+/// 导出表
+model Export {
+  id            String        @id @default(uuid()) @db.Uuid
+  projectId     String        @map("project_id") @db.Uuid
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // 格式
+  format        String        // mp4, webm, gif
+  resolution    String        // 1080p, 720p, 480p
+  quality       String        // high, medium, low
+
+  // 结果
+  url           String?       // 导出文件 URL
+  fileSize      BigInt?       @map("file_size") // 文件大小
+
+  // 状态
+  status        ExportStatus  @default(PENDING)
+  progress      Int           @default(0)
+  error         String?       @db.Text
+
+  // 下载信息
+  downloadCount Int           @default(0) @map("download_count")
+  expiresAt     DateTime?     @map("expires_at") // 下载链接过期时间
+
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@index([projectId])
+  @@index([status])
+  @@map("exports")
+}
+
+/// API Key 表
+model ApiKey {
+  id            String      @id @default(uuid()) @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 密钥信息
+  name          String
+  key           String      @unique  // API Key (前缀 + 随机字符串)
+  keyHash       String      @map("key_hash") // 哈希后的密钥
+
+  // 权限
+  scopes        String[]    // 权限范围
+
+  // 状态
+  isActive      Boolean     @default(true) @map("is_active")
+
+  // 使用限制
+  rateLimit     Int         @default(100) @map("rate_limit") // 每小时请求限制
+
+  // 时间
+  lastUsedAt    DateTime?   @map("last_used_at")
+  expiresAt     DateTime?   @map("expires_at")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@index([userId])
+  @@index([key])
+  @@map("api_keys")
+}
+
+/// Webhook 表
+model Webhook {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 端点信息
+  name            String
+  url             String
+  secret          String    // 签名密钥
+
+  // 事件
+  events          String[]  // 订阅的事件类型
+
+  // 状态
+  isActive        Boolean   @default(true) @map("is_active")
+
+  // 统计
+  successCount    Int       @default(0) @map("success_count")
+  failCount       Int       @default(0) @map("fail_count")
+  lastTriggeredAt DateTime? @map("last_triggered_at")
+
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+
+  @@index([userId])
+  @@map("webhooks")
 }

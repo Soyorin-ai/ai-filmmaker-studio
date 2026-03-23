@@ -16,7 +16,7 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<{user: UserDto; accessToken: string}> {
     const passwordHash = hashSync(dto.password, saltRounds);
-    const user = await this.usersService.create(dto.email, passwordHash);
+    const user = await this.usersService.create(dto.email, passwordHash, dto.nickname);
     const accessToken = this.signToken(user.id, user.email, user.role);
 
     return {user: this.usersService.toDto(user), accessToken};

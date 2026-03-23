@@ -20,7 +20,7 @@ export class UsersService {
     return (await this.prisma.user.findUnique({where: {email}})) ?? undefined;
   }
 
-  async create(email: string, passwordHash: string): Promise<User> {
+  async create(email: string, passwordHash: string, nickname?: string): Promise<User> {
     const existing = await this.prisma.user.findUnique({where: {email}});
 
     if (existing) {
@@ -28,7 +28,12 @@ export class UsersService {
     }
 
     return this.prisma.user.create({
-      data: {email, passwordHash, role: UserRole.USER},
+      data: {
+        email,
+        passwordHash,
+        role: UserRole.USER,
+        nickname: nickname || email.split('@')[0],
+      },
     });
   }
 
