@@ -15,13 +15,13 @@ interface ApiResponse<T> {
 interface ImageGenResponse {
   imageUrl?: string;
   metadata?: {
-    format: string;
+    format?: string;
   };
 }
 
 interface VideoGenResponse {
-  taskId: string;
-  status: string;
+  taskId?: string;
+  status?: string;
 }
 
 interface VideoTaskResponse {
@@ -34,8 +34,8 @@ interface VideoTaskResponse {
 }
 
 interface MusicGenResponse {
-  taskId: string;
-  status: string;
+  taskId?: string;
+  status?: string;
 }
 
 interface MusicTaskResponse {

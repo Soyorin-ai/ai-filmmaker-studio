@@ -11,6 +11,7 @@ import {AssetsPage} from '../pages/assets/AssetsPage.tsx';
 import {ProjectsPage} from '../pages/projects/ProjectsPage.tsx';
 import {ProjectDetailPage} from '../pages/projects/ProjectDetailPage.tsx';
 import {TimelinePage} from '../pages/timeline/TimelinePage.tsx';
+import {WorkflowPage} from '../pages/workflow/WorkflowPage.tsx';
 import {MainLayout} from '@/layouts/MainLayout.tsx';
 import {BareLayout} from '@/layouts/BareLayout.tsx';
 import {ProvidersLayout} from '@/layouts/ProvidersLayout.tsx';
@@ -36,6 +37,8 @@ export const router = createBrowserRouter([
           {path: 'projects', element: <ProjectsPage />},
           {path: 'projects/:id', element: <ProjectDetailPage />},
           {path: 'projects/:id/timeline', element: <TimelinePage />},
+          {path: 'workflow', element: <WorkflowPage />},
+          {path: 'workflow/:id', element: <WorkflowPage />},
         ],
       },
       {
