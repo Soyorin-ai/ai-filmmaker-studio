@@ -1,14 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Film, Upload, Download, Sparkles, Video, X, RefreshCw } from 'lucide-react';
-import { aiApi, type VideoGenParams, type VideoTaskStatus } from '@/api/ai';
+import { Upload, Download, Sparkles, Video, X, ArrowLeft, Play, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 
 // 表单验证 Schema
 const videoGenSchema = z.object({
@@ -19,7 +21,7 @@ const videoGenSchema = z.object({
   generateAudio: z.boolean().default(false),
 });
 
-type VideoGenFormData = z.output<typeof videoGenSchema>;
+type VideoGenFormData = z.infer<typeof videoGenSchema>;
 
 // 分辨率选项
 const RESOLUTIONS = [
@@ -38,13 +40,20 @@ const DURATIONS = [
   { value: 12, label: '12 秒' },
 ];
 
+// 任务状态
+interface VideoTask {
+  taskId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress?: number;
+  videoUrl?: string;
+  error?: string;
+}
+
 export function VideoPage() {
   const [activeTab, setActiveTab] = useState<'text2video' | 'image2video' | 'frame2video'>('text2video');
   const [firstFrameImage, setFirstFrameImage] = useState<string | null>(null);
   const [lastFrameImage, setLastFrameImage] = useState<string | null>(null);
-  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [taskProgress, setTaskProgress] = useState(0);
+  const [generatedVideo, setGeneratedVideo] = useState<VideoTask | null>(null);
 
   const firstFrameInputRef = useRef<HTMLInputElement>(null);
   const lastFrameInputRef = useRef<HTMLInputElement>(null);
@@ -54,474 +63,441 @@ export function VideoPage() {
     handleSubmit,
     watch,
     setValue,
-    reset,
     formState: { errors },
   } = useForm<VideoGenFormData>({
     resolver: zodResolver(videoGenSchema) as any,
     defaultValues: {
       type: 'text2video',
       resolution: '720p',
-      duration: 5,
+      duration: 6,
       generateAudio: false,
     },
   });
 
-  const watchedResolution = watch('resolution');
-  const watchedDuration = watch('duration');
-  const watchedGenerateAudio = watch('generateAudio');
-
-  // 切换 Tab 时更新表单
-  useEffect(() => {
-    setValue('type', activeTab);
-  }, [activeTab, setValue]);
-
-  // 图片上传处理
   const handleImageUpload = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    type: 'first' | 'last'
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (img: string | null) => void
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('图片大小不能超过 10MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      if (base64) {
-        const base64Data = base64.split(',')[1] || '';
-        if (base64Data) {
-          if (type === 'first') {
-            setFirstFrameImage(base64Data);
-          } else {
-            setLastFrameImage(base64Data);
-          }
-          toast.success('图片已上传');
-        }
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // 移除图片
-  const handleRemoveImage = (type: 'first' | 'last') => {
-    if (type === 'first') {
-      setFirstFrameImage(null);
-      if (firstFrameInputRef.current) firstFrameInputRef.current.value = '';
-    } else {
-      setLastFrameImage(null);
-      if (lastFrameInputRef.current) lastFrameInputRef.current.value = '';
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        setter(base64);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // 生成视频
-  const generateMutation = useMutation({
-    mutationFn: (data: VideoGenParams) => aiApi.generateVideo(data),
-    onSuccess: (result) => {
-      if (result.success && result.data) {
-        toast.success('视频生成任务已提交，请稍候...');
-        pollTaskStatus(result.data.taskId);
+  const generateVideoMutation = useMutation({
+    mutationFn: async (data: VideoGenFormData) => {
+      const payload = {
+        ...data,
+        firstFrameImage: activeTab === 'frame2video' ? firstFrameImage : undefined,
+        lastFrameImage: activeTab === 'frame2video' ? lastFrameImage : undefined,
+        referenceImage: activeTab === 'image2video' ? firstFrameImage : undefined,
+      };
+      const response = await fetch('/api/v1/ai/video/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success && data.data?.taskId) {
+        toast.success('视频生成任务已创建');
+        pollTaskStatus(data.data.taskId);
       } else {
-        toast.error(result.error || '生成失败，请重试');
-        setIsGenerating(false);
+        toast.error(data.error || '生成失败');
       }
     },
-    onError: (error) => {
-      toast.error('生成失败，请检查网络或重试');
-      setIsGenerating(false);
-      console.error('Video generation error:', error);
+    onError: () => {
+      toast.error('生成失败，请稍后重试');
     },
   });
 
-  // 轮询任务状态
   const pollTaskStatus = async (taskId: string) => {
-    const poll = async () => {
-      try {
-        const status: VideoTaskStatus = await aiApi.getVideoTaskStatus(taskId);
-        setTaskProgress(status.progress || 0);
-
-        if (status.status === 'completed' && status.videoUrl) {
-          setGeneratedVideo(status.videoUrl);
-          setIsGenerating(false);
-          toast.success('视频生成成功！');
-        } else if (status.status === 'failed') {
-          toast.error(status.error || '视频生成失败');
-          setIsGenerating(false);
-        } else if (status.status === 'processing' || status.status === 'pending') {
-          // 继续轮询
-          setTimeout(poll, 3000);
-        }
-      } catch (error) {
-        console.error('Poll error:', error);
-        setTimeout(poll, 5000);
+    const poll = async (): Promise<VideoTask> => {
+      const response = await fetch(`/api/v1/ai/video/task/${taskId}`);
+      const data = await response.json();
+      if (data.data?.status === 'pending' || data.data?.status === 'processing') {
+        await new Promise((r) => setTimeout(r, 5000));
+        return poll();
       }
+      return data.data;
     };
-
-    poll();
+    try {
+      const result = await poll();
+      setGeneratedVideo(result);
+      if (result.status === 'completed') {
+        toast.success('视频生成完成！');
+      } else if (result.status === 'failed') {
+        toast.error(result.error || '生成失败');
+      }
+    } catch {
+      toast.error('查询任务状态失败');
+    }
   };
 
   const onSubmit = (data: VideoGenFormData) => {
-    // 验证图片上传
-    if (data.type === 'image2video' && !firstFrameImage) {
-      toast.error('请上传首帧图片');
-      return;
-    }
-    if (data.type === 'frame2video') {
-      if (!firstFrameImage) {
-        toast.error('请上传首帧图片');
-        return;
-      }
-      if (!lastFrameImage) {
-        toast.error('请上传尾帧图片');
-        return;
-      }
-    }
-
-    setIsGenerating(true);
-    setGeneratedVideo(null);
-    setTaskProgress(0);
-
-    generateMutation.mutate({
-      ...data,
-      firstFrameImage: firstFrameImage || undefined,
-      lastFrameImage: lastFrameImage || undefined,
-    });
+    data.type = activeTab;
+    generateVideoMutation.mutate(data);
   };
 
-  // 下载视频
-  const handleDownload = () => {
-    if (!generatedVideo) return;
+  const downloadVideo = () => {
+    if (!generatedVideo?.videoUrl) return;
     const link = document.createElement('a');
-    link.href = generatedVideo;
-    link.download = `ai-generated-video-${Date.now()}.mp4`;
+    link.href = generatedVideo.videoUrl;
+    link.download = `ai-video-${Date.now()}.mp4`;
     link.click();
   };
 
-  // 重置表单
-  const handleReset = () => {
-    reset();
-    setFirstFrameImage(null);
-    setLastFrameImage(null);
-    setGeneratedVideo(null);
-    setTaskProgress(0);
-    setIsGenerating(false);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
-            <Film className="w-10 h-10 text-purple-500" style={{ filter: 'drop-shadow(0 0 15px rgba(168,85,247,0.5))' }} />
-            AI 生视频工作台
-          </h1>
-          <p className="text-slate-200 text-lg" style={{ textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>
-            通过文字或图片，生成高质量的视频内容
-          </p>
+    <div
+      className="min-h-screen relative"
+      style={{
+        background: 'linear-gradient(180deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)'
+      }}
+    >
+      {/* Header */}
+      <header
+        className="border-b border-white/10 sticky top-0 z-10 backdrop-blur-sm"
+        style={{ background: 'rgba(15, 23, 42, 0.8)' }}
+      >
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer">
+              <ArrowLeft className="w-5 h-5" />
+              <span>返回</span>
+            </Link>
+            <div className="w-px h-6 bg-white/20" />
+            <h1 className="text-xl font-semibold flex items-center gap-2 text-white">
+              <Video className="w-6 h-6" style={{ color: '#A78BFA' }} />
+              AI 生视频工作台
+            </h1>
+          </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 左侧：输入区域 */}
-          <div className="space-y-6">
-            {/* 模式选择 Tabs */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-2">
-              <div className="flex gap-2">
-                {[
-                  { key: 'text2video', label: '文生视频', icon: '✍️' },
-                  { key: 'image2video', label: '图生视频', icon: '🖼️' },
-                  { key: 'frame2video', label: '首尾帧生视频', icon: '🎬' },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key as any)}
-                    className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                      activeTab === tab.key
-                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                    }`}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-5 gap-8">
+          {/* 左侧：表单 */}
+          <div className="lg:col-span-3 space-y-6">
+            <div
+              className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
+              style={{
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+              }}
+            >
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+                <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10 rounded-xl p-1">
+                  <TabsTrigger value="text2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">文生视频</TabsTrigger>
+                  <TabsTrigger value="image2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">图生视频</TabsTrigger>
+                  <TabsTrigger value="frame2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">首尾帧生视频</TabsTrigger>
+                </TabsList>
+
+                <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
+                  {/* 文生视频 */}
+                  <TabsContent value="text2video" className="space-y-4 mt-0">
+                    <div>
+                      <Label className="text-white/70">视频描述 *</Label>
+                      <Textarea
+                        {...register('prompt')}
+                        placeholder="描述你想要的视频，例如：一只可爱的橘猫在阳光下打盹，毛发随风轻摆"
+                        rows={4}
+                        className="mt-2 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-purple-400/50"
+                      />
+                      {errors.prompt && (
+                        <p className="text-sm text-red-400 mt-1">{errors.prompt.message}</p>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  {/* 图生视频 */}
+                  <TabsContent value="image2video" className="space-y-4 mt-0">
+                    <div>
+                      <Label className="text-white/70">上传首帧图片 *</Label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, setFirstFrameImage)}
+                        ref={firstFrameInputRef}
+                        className="hidden"
+                      />
+                      {firstFrameImage ? (
+                        <div className="relative inline-block mt-2">
+                          <img
+                            src={`data:image/jpeg;base64,${firstFrameImage}`}
+                            alt="首帧"
+                            className="w-48 h-32 object-cover rounded-lg border border-white/10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setFirstFrameImage(null)}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
+                          >
+                            <X className="w-4 h-4 text-white" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => firstFrameInputRef.current?.click()}
+                          className="w-48 h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-2 mt-2 hover:border-purple-400/50 transition-colors cursor-pointer"
+                        >
+                          <Upload className="w-8 h-8 text-white/40" />
+                          <span className="text-sm text-white/40">上传图片</span>
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-white/70">视频描述</Label>
+                      <Textarea
+                        {...register('prompt')}
+                        placeholder="描述视频的运动效果，例如：镜头缓慢推进，猫咪微微睁眼"
+                        rows={3}
+                        className="mt-2 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-purple-400/50"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* 首尾帧生视频 */}
+                  <TabsContent value="frame2video" className="space-y-4 mt-0">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-white/70">首帧图片 *</Label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, setFirstFrameImage)}
+                          ref={firstFrameInputRef}
+                          className="hidden"
+                        />
+                        {firstFrameImage ? (
+                          <div className="relative inline-block mt-2">
+                            <img
+                              src={`data:image/jpeg;base64,${firstFrameImage}`}
+                              alt="首帧"
+                              className="w-full h-24 object-cover rounded-lg border border-white/10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setFirstFrameImage(null)}
+                              className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => firstFrameInputRef.current?.click()}
+                            className="w-full h-24 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-1 mt-2 hover:border-purple-400/50 transition-colors cursor-pointer"
+                          >
+                            <Upload className="w-6 h-6 text-white/40" />
+                            <span className="text-xs text-white/40">首帧</span>
+                          </button>
+                        )}
+                      </div>
+                      <div>
+                        <Label className="text-white/70">尾帧图片 *</Label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, setLastFrameImage)}
+                          ref={lastFrameInputRef}
+                          className="hidden"
+                        />
+                        {lastFrameImage ? (
+                          <div className="relative inline-block mt-2">
+                            <img
+                              src={`data:image/jpeg;base64,${lastFrameImage}`}
+                              alt="尾帧"
+                              className="w-full h-24 object-cover rounded-lg border border-white/10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setLastFrameImage(null)}
+                              className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition-colors cursor-pointer"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => lastFrameInputRef.current?.click()}
+                            className="w-full h-24 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center gap-1 mt-2 hover:border-purple-400/50 transition-colors cursor-pointer"
+                          >
+                            <Upload className="w-6 h-6 text-white/40" />
+                            <span className="text-xs text-white/40">尾帧</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-white/70">过渡描述</Label>
+                      <Textarea
+                        {...register('prompt')}
+                        placeholder="描述首尾帧之间的过渡效果"
+                        rows={2}
+                        className="mt-2 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-purple-400/50"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {/* 通用设置 */}
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                    <div>
+                      <Label className="text-white/70">分辨率</Label>
+                      <Select
+                        value={watch('resolution')}
+                        onValueChange={(v) => setValue('resolution', v as any)}
+                      >
+                        <SelectTrigger className="mt-2 bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-white/20">
+                          {RESOLUTIONS.map((r) => (
+                            <SelectItem key={r.value} value={r.value} className="hover:bg-white/10">
+                              {r.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-white/70">时长</Label>
+                      <Select
+                        value={watch('duration')?.toString()}
+                        onValueChange={(v) => setValue('duration', parseInt(v))}
+                      >
+                        <SelectTrigger className="mt-2 bg-white/5 border-white/10 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-white/20">
+                          {DURATIONS.map((d) => (
+                            <SelectItem key={d.value} value={d.value.toString()} className="hover:bg-white/10">
+                              {d.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="generateAudio"
+                      checked={watch('generateAudio')}
+                      onChange={(e) => setValue('generateAudio', e.target.checked)}
+                      className="w-4 h-4 accent-purple-500"
+                    />
+                    <Label htmlFor="generateAudio" className="text-white/70 cursor-pointer">
+                      自动生成音效
+                    </Label>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-lg cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                      boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4)'
+                    }}
+                    disabled={generateVideoMutation.isPending}
                   >
-                    <span className="mr-2">{tab.icon}</span>
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+                    {generateVideoMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        生成中...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        生成视频
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </Tabs>
             </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* 提示词输入 */}
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-                <Label htmlFor="prompt" className="text-white text-lg font-semibold mb-3 block">
-                  提示词 <span className="text-purple-500">*</span>
-                </Label>
-                <textarea
-                  {...register('prompt')}
-                  id="prompt"
-                  rows={4}
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all resize-none"
-                  placeholder="描述你想要的视频内容，例如：一个女孩在樱花树下跳舞，花瓣随风飘落..."
-                />
-                {errors.prompt && (
-                  <p className="text-purple-500 text-sm mt-2">{errors.prompt.message}</p>
-                )}
-              </div>
-
-              {/* 首帧图片上传（图生视频/首尾帧生视频） */}
-              {(activeTab === 'image2video' || activeTab === 'frame2video') && (
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-                  <Label className="text-white text-lg font-semibold mb-3 block">
-                    首帧图片 <span className="text-purple-500">*</span>
-                  </Label>
-                  <p className="text-slate-400 text-sm mb-4">
-                    视频将从这张图片开始
-                  </p>
-
-                  {firstFrameImage ? (
-                    <div className="relative">
-                      <img
-                        src={`data:image/jpeg;base64,${firstFrameImage}`}
-                        alt="首帧图片"
-                        className="w-full h-48 object-cover rounded-lg border border-slate-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage('first')}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => firstFrameInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
-                    >
-                      <Upload className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                      <p className="text-slate-400 text-sm">点击上传首帧图片</p>
-                    </div>
-                  )}
-                  <input
-                    ref={firstFrameInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={(e) => handleImageUpload(e, 'first')}
-                    className="hidden"
-                  />
-                </div>
-              )}
-
-              {/* 尾帧图片上传（首尾帧生视频） */}
-              {activeTab === 'frame2video' && (
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-                  <Label className="text-white text-lg font-semibold mb-3 block">
-                    尾帧图片 <span className="text-purple-500">*</span>
-                  </Label>
-                  <p className="text-slate-400 text-sm mb-4">
-                    视频将结束于这张图片
-                  </p>
-
-                  {lastFrameImage ? (
-                    <div className="relative">
-                      <img
-                        src={`data:image/jpeg;base64,${lastFrameImage}`}
-                        alt="尾帧图片"
-                        className="w-full h-48 object-cover rounded-lg border border-slate-600"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage('last')}
-                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => lastFrameInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
-                    >
-                      <Upload className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                      <p className="text-slate-400 text-sm">点击上传尾帧图片</p>
-                    </div>
-                  )}
-                  <input
-                    ref={lastFrameInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={(e) => handleImageUpload(e, 'last')}
-                    className="hidden"
-                  />
-                </div>
-              )}
-
-              {/* 参数设置 */}
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-                <h3 className="text-white text-lg font-semibold mb-4">参数设置</h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* 分辨率 */}
-                  <div>
-                    <Label className="text-slate-300 text-sm font-medium mb-2 block">
-                      分辨率
-                    </Label>
-                    <Select value={watchedResolution} onValueChange={(value) => setValue('resolution', value as any)}>
-                      <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {RESOLUTIONS.map((res) => (
-                          <SelectItem key={res.value} value={res.value}>
-                            {res.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* 时长 */}
-                  <div>
-                    <Label className="text-slate-300 text-sm font-medium mb-2 block">
-                      视频时长
-                    </Label>
-                    <Select 
-                      value={watchedDuration?.toString()} 
-                      onValueChange={(value) => setValue('duration', parseInt(value))}
-                    >
-                      <SelectTrigger className="bg-slate-900 border-slate-600 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DURATIONS.map((dur) => (
-                          <SelectItem key={dur.value} value={dur.value.toString()}>
-                            {dur.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* 是否生成音频 */}
-                <div className="mt-4 flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="generateAudio"
-                    checked={watchedGenerateAudio}
-                    onChange={(e) => setValue('generateAudio', e.target.checked)}
-                    className="w-5 h-5 rounded border-slate-600 bg-slate-900 text-purple-500 focus:ring-purple-500"
-                  />
-                  <Label htmlFor="generateAudio" className="text-slate-300 text-sm cursor-pointer">
-                    生成音频（AI 自动配音）
-                  </Label>
-                </div>
-              </div>
-
-              {/* 按钮组 */}
-              <div className="flex gap-3">
-                <Button
-                  type="submit"
-                  disabled={isGenerating}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-4 text-lg shadow-lg shadow-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                      生成中... {taskProgress > 0 ? `${taskProgress}%` : ''}
-                    </>
-                  ) : (
-                    <>
-                      <Film className="w-5 h-5 mr-2" />
-                      开始生成
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleReset}
-                  variant="outline"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  重置
-                </Button>
-              </div>
-            </form>
           </div>
 
           {/* 右侧：结果展示 */}
-          <div className="lg:sticky lg:top-8 h-fit">
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-              <h3 className="text-white text-lg font-semibold mb-4 flex items-center gap-2">
-                <Video className="w-5 h-5 text-purple-500" />
-                生成结果
-              </h3>
+          <div className="lg:col-span-2 space-y-6">
+            <div
+              className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
+              style={{
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+              }}
+            >
+              <h2 className="text-lg font-semibold mb-4 text-white">生成结果</h2>
 
               {generatedVideo ? (
                 <div className="space-y-4">
-                  <div className="relative">
-                    <video
-                      src={generatedVideo}
-                      controls
-                      className="w-full rounded-lg border border-slate-600 shadow-2xl"
-                    />
-                  </div>
+                  {generatedVideo.status === 'processing' && (
+                    <div className="flex items-center gap-2 text-purple-400">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>生成中... {generatedVideo.progress || 0}%</span>
+                    </div>
+                  )}
 
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={handleDownload}
-                      className="flex-1 bg-slate-700 hover:bg-slate-600 text-white"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      下载视频
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
-                    >
-                      保存到素材库
-                    </Button>
-                  </div>
-                </div>
-              ) : isGenerating ? (
-                <div className="border-2 border-dashed border-slate-600 rounded-lg p-12 text-center">
-                  <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                  <p className="text-slate-400 text-sm mb-2">视频生成中...</p>
-                  {taskProgress > 0 && (
-                    <div className="w-full bg-slate-700 rounded-full h-2 mt-4">
-                      <div
-                        className="bg-purple-500 h-2 rounded-full transition-all"
-                        style={{ width: `${taskProgress}%` }}
+                  {generatedVideo.status === 'completed' && generatedVideo.videoUrl && (
+                    <>
+                      <video
+                        src={generatedVideo.videoUrl}
+                        controls
+                        className="w-full rounded-lg border border-white/10"
                       />
+                      <Button
+                        onClick={downloadVideo}
+                        className="w-full cursor-pointer"
+                        style={{
+                          background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                          boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
+                        }}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        下载视频
+                      </Button>
+                    </>
+                  )}
+
+                  {generatedVideo.status === 'failed' && (
+                    <div className="text-red-400">
+                      生成失败: {generatedVideo.error || '未知错误'}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-slate-600 rounded-lg p-12 text-center">
-                  <Video className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-500 text-sm">
-                    生成的视频将在这里显示
-                  </p>
+                <div className="text-center py-12 text-white/40">
+                  <Video className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>选择模式，开始创作你的视频</p>
                 </div>
               )}
             </div>
 
-            {/* 提示 */}
-            <div className="mt-4 bg-slate-800/30 border border-slate-700 rounded-lg p-4">
-              <h4 className="text-slate-300 font-medium mb-2 text-sm">💡 提示</h4>
-              <ul className="text-slate-500 text-xs space-y-1">
-                <li>• 详细的提示词会得到更好的结果</li>
-                <li>• 图生视频可以控制视频起始画面</li>
-                <li>• 首尾帧生视频适合制作转场效果</li>
-                <li>• 720p 适合大多数场景，1080p 适合最终输出</li>
-                <li>• 开启音频生成会自动为视频配音</li>
+            {/* 使用说明 */}
+            <div
+              className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
+              style={{
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+              }}
+            >
+              <h3 className="font-semibold mb-3 text-white">使用提示</h3>
+              <ul className="space-y-2 text-sm text-white/50">
+                <li>• <strong>文生视频</strong>：用文字描述生成视频</li>
+                <li>• <strong>图生视频</strong>：上传图片，让AI生成动态效果</li>
+                <li>• <strong>首尾帧生视频</strong>：上传开始和结束图片，AI生成过渡</li>
+                <li>• 生成时间约 30-60 秒，请耐心等待</li>
               </ul>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

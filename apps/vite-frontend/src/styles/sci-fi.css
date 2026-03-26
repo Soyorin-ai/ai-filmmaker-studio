@@ -1,0 +1,166 @@
+/* 科幻风格配色系统 - Cyberpunk Sci-Fi Theme */
+
+:root {
+  /* 主色调 - 霓虹色 */
+  --neon-cyan: #00f5ff;
+  --neon-pink: #ff00ff;
+  --neon-purple: #bf00ff;
+  --neon-blue: #0080ff;
+  --neon-green: #00ff88;
+  --neon-yellow: #ffff00;
+  --neon-orange: #ff6600;
+  
+  /* 背景色 - 深色 */
+  --bg-darkest: #0a0a0f;
+  --bg-darker: #0d0d14;
+  --bg-dark: #12121a;
+  --bg-medium: #1a1a25;
+  --bg-light: #252535;
+  
+  /* 文字色 */
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e8;
+  --text-muted: #8888aa;
+  --text-dim: #555577;
+  
+  /* 边框 */
+  --border-dim: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-glow: rgba(0, 245, 255, 0.3);
+  
+  /* 渐变 */
+  --gradient-primary: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+  --gradient-secondary: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+  --gradient-accent: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
+  --gradient-bg: linear-gradient(180deg, var(--bg-darkest) 0%, var(--bg-dark) 50%, var(--bg-darker) 100%);
+  
+  /* 发光效果 */
+  --glow-cyan: 0 0 20px rgba(0, 245, 255, 0.5);
+  --glow-pink: 0 0 20px rgba(255, 0, 255, 0.5);
+  --glow-purple: 0 0 20px rgba(191, 0, 255, 0.5);
+}
+
+/* 全局样式覆盖 */
+.bg-gradient-to-br {
+  background: var(--gradient-bg) !important;
+}
+
+/* 文字发光效果 */
+.glow-text-cyan {
+  color: var(--neon-cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.glow-text-pink {
+  color: var(--neon-pink);
+  text-shadow: var(--glow-pink);
+}
+
+.glow-text-purple {
+  color: var(--neon-purple);
+  text-shadow: var(--glow-purple);
+}
+
+/* 卡片科幻边框 */
+.sci-fi-card {
+  background: rgba(18, 18, 26, 0.8);
+  border: 1px solid var(--border-light);
+  box-shadow: 
+    0 0 0 1px rgba(0, 245, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.sci-fi-card:hover {
+  border-color: rgba(0, 245, 255, 0.3);
+  box-shadow: 
+    0 0 20px rgba(0, 245, 255, 0.15),
+    0 0 0 1px rgba(0, 245, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 霓虹按钮 */
+.neon-button-cyan {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(0, 245, 255, 0.1));
+  border: 1px solid rgba(0, 245, 255, 0.5);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+.neon-button-cyan:hover {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(0, 245, 255, 0.2));
+  box-shadow: 0 0 25px rgba(0, 245, 255, 0.4);
+}
+
+.neon-button-pink {
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(255, 0, 255, 0.1));
+  border: 1px solid rgba(255, 0, 255, 0.5);
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+}
+
+.neon-button-pink:hover {
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.3), rgba(255, 0, 255, 0.2));
+  box-shadow: 0 0 25px rgba(255, 0, 255, 0.4);
+}
+
+/* 扫描线效果 */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+/* 网格背景 */
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* 脉冲动画 */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.2);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* 打字机光标效果 */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '|';
+  animation: blink 1s step-end infinite;
+  color: var(--neon-cyan);
+}

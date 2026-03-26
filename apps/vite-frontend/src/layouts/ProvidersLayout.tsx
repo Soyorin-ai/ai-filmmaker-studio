@@ -19,7 +19,29 @@ export function ProvidersLayout() {
             <ConfirmProvider>
               <ReactQueryProvider>
                 <LoadingAnimation />
-                <Outlet />
+                {/* 全局科幻风格背景 */}
+                <div 
+                  className="min-h-screen relative"
+                  style={{
+                    background: 'linear-gradient(180deg, #0a0a0f 0%, #0d0d14 30%, #12121a 60%, #0a0a0f 100%)'
+                  }}
+                >
+                  {/* 网格背景 */}
+                  <div 
+                    className="absolute inset-0 opacity-30 pointer-events-none"
+                    style={{
+                      backgroundImage: `
+                        linear-gradient(rgba(0,245,255,0.02) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,245,255,0.02) 1px, transparent 1px)
+                      `,
+                      backgroundSize: '50px 50px'
+                    }}
+                  />
+                  {/* 内容区域 */}
+                  <div className="relative z-10">
+                    <Outlet />
+                  </div>
+                </div>
               </ReactQueryProvider>
             </ConfirmProvider>
           </ToastProvider>

@@ -1,12 +1,25 @@
-import {Helmet} from 'react-helmet-async';
-import {useParams, Link} from 'react-router-dom';
-import {Wand2, Film, Sparkles, FolderOpen, Folder, LogIn, UserPlus, LogOut, User} from 'lucide-react';
-import {useMe, useLogout} from '@/hooks/use-auth/use-auth.hook';
+import { Helmet } from 'react-helmet-async';
+import { useParams, Link } from 'react-router-dom';
+import { 
+  Wand2, 
+  Film, 
+  Sparkles, 
+  FolderOpen, 
+  LogIn, 
+  UserPlus, 
+  LogOut, 
+  User,
+  ChevronRight,
+  Play,
+  Music,
+  Clapperboard
+} from 'lucide-react';
+import { useMe, useLogout } from '@/hooks/use-auth/use-auth.hook';
 
 export function Home() {
-  const {locale} = useParams<{locale: string}>();
-  const {user, isLoading} = useMe();
-  const {logout} = useLogout();
+  const { locale } = useParams<{ locale: string }>();
+  const { user, isLoading } = useMe();
+  const { logout } = useLogout();
 
   const handleLogout = async () => {
     await logout();
@@ -18,154 +31,355 @@ export function Home() {
         <title>AI Filmmaker Studio</title>
         <meta name="description" content="AI 短片制作平台 - 从创意到成片" />
         <html lang={locale || 'en'} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
       </Helmet>
-      
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900">
-        {/* Header */}
-        <header className="absolute top-0 left-0 right-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-end gap-3">
-            {isLoading ? (
-              <div className="w-24 h-10 bg-slate-800 animate-pulse rounded-lg" />
-            ) : user ? (
-              <>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 rounded-lg border border-slate-700">
-                  <User className="w-4 h-4 text-purple-400" />
-                  <span className="text-slate-200">{user.nickname || user.email}</span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  退出
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="login"
-                  className="px-4 py-2 text-slate-300 hover:text-white transition-colors flex items-center gap-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  登录
-                </Link>
-                <Link
-                  to="register"
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  注册
-                </Link>
-              </>
-            )}
-          </div>
-        </header>
 
-        {/* Main Content */}
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 py-20">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="px-6 py-4 flex justify-end gap-3">
+          {isLoading ? (
+            <div className="w-24 h-10 bg-white/10 animate-pulse rounded-lg" />
+          ) : user ? (
+            <>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                <User className="w-4 h-4" style={{ color: '#60A5FA' }} />
+                <span className="text-white/90 font-medium">{user.email}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center gap-2 border border-transparent hover:border-white/20 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                退出
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="login"
+                className="px-5 py-2.5 text-white/80 hover:text-white transition-all duration-200 flex items-center gap-2 border border-white/20 hover:border-white/40 rounded-lg bg-white/5 hover:bg-white/10 backdrop-blur-sm cursor-pointer"
+              >
+                <LogIn className="w-4 h-4" />
+                登录
+              </Link>
+              <Link
+                to="register"
+                className="px-5 py-2.5 text-white font-medium rounded-lg flex items-center gap-2 transition-all duration-200 hover:shadow-lg cursor-pointer"
+                style={{ 
+                  background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                  boxShadow: '0 4px 20px rgba(249, 115, 22, 0.3)'
+                }}
+              >
+                <UserPlus className="w-4 h-4" />
+                注册
+              </Link>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div 
+        className="min-h-screen relative overflow-hidden"
+        style={{ 
+          fontFamily: "'Inter', sans-serif",
+          background: 'linear-gradient(180deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)'
+        }}
+      >
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          {/* Grid */}
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(96, 165, 250, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(96, 165, 250, 0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '80px 80px'
+            }}
+          />
+          
+          {/* Floating Orbs */}
+          <div 
+            className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl animate-pulse"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(96, 165, 250, 0.15) 0%, transparent 70%)',
+              animation: 'float 8s ease-in-out infinite'
+            }}
+          />
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(249, 115, 22, 0.12) 0%, transparent 70%)',
+              animation: 'float 10s ease-in-out infinite reverse'
+            }}
+          />
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 60%)'
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-32">
+          
           {/* Logo & Title */}
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <Film className="w-16 h-16 text-rose-500" style={{ filter: 'drop-shadow(0 0 15px rgba(244,63,94,0.5))' }} />
-              <Sparkles className="w-12 h-12 text-purple-500" style={{ filter: 'drop-shadow(0 0 15px rgba(168,85,247,0.5))' }} />
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div 
+                className="relative p-4 rounded-2xl border border-white/20 backdrop-blur-sm"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(15, 23, 42, 0.8))',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                }}
+              >
+                <Clapperboard className="w-12 h-12" style={{ color: '#60A5FA' }} />
+              </div>
+              <div 
+                className="relative p-3 rounded-xl"
+                style={{ 
+                  background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                  boxShadow: '0 8px 24px rgba(249, 115, 22, 0.4)'
+                }}
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
+            
+            <h1 
+              className="text-5xl md:text-7xl font-bold mb-6 tracking-tight"
+              style={{ 
+                fontFamily: "'Space Grotesk', sans-serif",
+                background: 'linear-gradient(135deg, #60A5FA 0%, #A78BFA 50%, #F97316 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 0 60px rgba(96, 165, 250, 0.3)'
+              }}
+            >
               AI Filmmaker Studio
             </h1>
-            <p className="text-xl text-slate-200 max-w-2xl mx-auto" style={{ textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>
-              从创意到成片，AI 全程助力。打造属于你的短片作品。
+            
+            <p className="text-xl text-white/60 max-w-2xl mx-auto leading-relaxed font-light">
+              从创意到成片，<span className="text-white font-medium">AI</span> 全程助力。
+              <br />
+              打造属于你的短片作品。
             </p>
           </div>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
-            {/* 生图卡片 */}
+          <div className="grid md:grid-cols-4 gap-6 max-w-6xl w-full mb-16">
+            {/* AI 生图 */}
             <Link
               to="create/image"
-              className="group bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-rose-500 transition-all hover:shadow-lg hover:shadow-rose-500/20"
+              className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.6))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg shadow-rose-500/30">
-                  <Wand2 className="w-6 h-6 text-white" />
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1), transparent)' }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+                      boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)'
+                    }}
+                  >
+                    <Wand2 className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="min-h-[3.5rem] flex flex-col justify-center">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 whitespace-nowrap transition-colors duration-300 group-hover:text-blue-400">
+                      AI 生图
+                      <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </h2>
+                    <p className="text-white/40 text-xs font-mono tracking-wider">IMAGE_GENERATION</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white group-hover:text-rose-400 transition-colors">
-                    AI 生图
-                  </h2>
-                  <p className="text-slate-400 text-xs">Image Generation</p>
-                </div>
+                <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
+                  文生图、图生图，支持多种分辨率
+                </p>
               </div>
-              <p className="text-slate-300 text-sm">
-                文生图、图生图，支持多种分辨率和宽高比
-              </p>
             </Link>
 
-            {/* 生视频卡片 */}
+            {/* AI 生视频 */}
             <Link
               to="create/video"
-              className="group bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-purple-500 transition-all hover:shadow-lg hover:shadow-purple-500/20"
+              className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.6))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <Film className="w-6 h-6 text-white" />
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1), transparent)' }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+                      boxShadow: '0 8px 24px rgba(139, 92, 246, 0.3)'
+                    }}
+                  >
+                    <Play className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="min-h-[3.5rem] flex flex-col justify-center">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 whitespace-nowrap transition-colors duration-300 group-hover:text-purple-400">
+                      AI 生视频
+                      <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </h2>
+                    <p className="text-white/40 text-xs font-mono tracking-wider">VIDEO_GENERATION</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
-                    AI 生视频
-                  </h2>
-                  <p className="text-slate-400 text-xs">Video Generation</p>
-                </div>
+                <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
+                  文生视频、图生视频、首尾帧生视频
+                </p>
               </div>
-              <p className="text-slate-300 text-sm">
-                文生视频、图生视频、首尾帧生视频
-              </p>
             </Link>
 
-            {/* 项目管理卡片 */}
+            {/* AI 音乐 */}
+            <Link
+              to="create/music"
+              className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.6))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1), transparent)' }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                      boxShadow: '0 8px 24px rgba(249, 115, 22, 0.3)'
+                    }}
+                  >
+                    <Music className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="min-h-[3.5rem] flex flex-col justify-center">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 whitespace-nowrap transition-colors duration-300 group-hover:text-orange-400">
+                      AI 音乐
+                      <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </h2>
+                    <p className="text-white/40 text-xs font-mono tracking-wider">MUSIC_GENERATION</p>
+                  </div>
+                </div>
+                <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
+                  AI 生成歌曲、背景音乐、自定义歌词
+                </p>
+              </div>
+            </Link>
+
+            {/* 项目管理 */}
             <Link
               to="projects"
-              className="group bg-slate-800/80 backdrop-blur-sm border border-slate-600 rounded-xl p-6 hover:border-blue-500 transition-all hover:shadow-lg hover:shadow-blue-500/20"
+              className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.6))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)'
+              }}
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <Folder className="w-6 h-6 text-white" />
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1), transparent)' }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #10B981, #059669)',
+                      boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)'
+                    }}
+                  >
+                    <FolderOpen className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="min-h-[3.5rem] flex flex-col justify-center">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 whitespace-nowrap transition-colors duration-300 group-hover:text-emerald-400">
+                      项目管理
+                      <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </h2>
+                    <p className="text-white/40 text-xs font-mono tracking-wider">PROJECT_MANAGEMENT</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                    项目管理
-                  </h2>
-                  <p className="text-slate-400 text-xs">Projects</p>
-                </div>
+                <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
+                  管理你的创作项目和时间线
+                </p>
               </div>
-              <p className="text-slate-300 text-sm">
-                管理你的短片项目，组织素材和工作流
-              </p>
             </Link>
           </div>
 
-          {/* CTA */}
-          <div className="flex flex-wrap justify-center gap-4">
+          {/* Bottom Actions */}
+          <div className="flex gap-4">
             <Link
               to="projects"
-              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/30 transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.8)'
+              }}
             >
+              <FolderOpen className="w-5 h-5" />
               我的项目
             </Link>
             <Link
               to="create/image"
-              className="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-semibold rounded-lg shadow-lg shadow-rose-500/30 transition-all"
+              className="flex items-center gap-2 px-6 py-3 text-white font-medium rounded-xl transition-all duration-200 cursor-pointer"
+              style={{ 
+                background: 'linear-gradient(135deg, #F97316, #EA580C)',
+                boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4)'
+              }}
             >
+              <Sparkles className="w-5 h-5" />
               开始创作
             </Link>
             <Link
               to="assets"
-              className="px-8 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.8)'
+              }}
             >
-              <FolderOpen className="w-5 h-5" />
               素材库
             </Link>
           </div>
         </div>
+
+        {/* CSS Animation */}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+        `}</style>
       </div>
     </>
   );

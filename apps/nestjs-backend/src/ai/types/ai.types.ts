@@ -73,3 +73,67 @@ export interface VideoTaskStatus {
   audioUrl?: string;
   error?: string;
 }
+
+/**
+ * 音乐生成模式
+ */
+export type MusicMode = 'simple' | 'custom' | 'instrumental';
+
+/**
+ * 音乐模型
+ */
+export type MusicModel =
+  | 'suno-v4'
+  | 'suno-v4.5'
+  | 'suno-v4.5plus'
+  | 'suno-v4.5all'
+  | 'suno-v5';
+
+/**
+ * 人声性别
+ */
+export type VocalGender = 'm' | 'f';
+
+/**
+ * 音乐生成参数
+ */
+export interface MusicGenParams {
+  prompt: string; // 音乐描述或歌词
+  mode: MusicMode; // 生成模式
+  model?: MusicModel; // 音乐模型
+  style?: string; // 风格标签（自定义模式必填）
+  title?: string; // 歌曲标题（自定义模式必填）
+  vocalGender?: VocalGender; // 人声性别
+  negativeTags?: string; // 负向风格标签
+  duration?: number; // 目标时长（30-240秒）
+}
+
+/**
+ * 音乐生成结果
+ */
+export interface MusicGenResult {
+  success: boolean;
+  taskId?: string; // 异步任务 ID
+  status?: 'pending' | 'processing' | 'completed' | 'failed';
+  audioUrl?: string; // 音频下载 URL
+  streamUrl?: string; // 流媒体 URL
+  title?: string; // 歌曲标题
+  duration?: number; // 时长（秒）
+  tags?: string; // 风格标签
+  error?: string;
+}
+
+/**
+ * 音乐任务状态查询结果
+ */
+export interface MusicTaskStatus {
+  taskId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress?: number;
+  audioUrl?: string;
+  streamUrl?: string;
+  title?: string;
+  duration?: number;
+  tags?: string;
+  error?: string;
+}

@@ -148,6 +148,11 @@ model Quota {
   videoUsed       Int       @default(0)    // 已使用秒数
   videoTotal      Int       @default(30)   // 总秒数
   
+  // 🎵 音乐额度（按秒计算）NEW!
+  musicSeconds    Int       @default(0)    // 剩余音乐秒数
+  musicUsed       Int       @default(0)    // 已使用秒数
+  musicTotal      Int       @default(60)   // 总秒数
+  
   // 存储额度
   storageBytes    Int       @default(0)    // 剩余存储空间
   storageUsed     Int       @default(0)    // 已使用空间
@@ -302,6 +307,31 @@ model Asset {
   
   // 元数据
   metadata    Json?       // 宽高、时长、帧率等
+  /**
+   * metadata 字段说明：
+   * 
+   * 图片：
+   * - width: 宽度
+   * - height: 高度
+   * - format: 格式 (png, jpg, webp)
+   * 
+   * 视频：
+   * - width: 宽度
+   * - height: 高度
+   * - duration: 时长（秒）
+   * - fps: 帧率
+   * - hasAudio: 是否有音频
+   * 
+   * 🎵 音乐（NEW!）：
+   * - duration: 时长（秒）
+   * - title: 歌曲名称
+   * - style: 风格标签数组 ["pop", "ballad"]
+   * - mood: 情绪
+   * - vocalGender: 人声性别 (m/f/null)
+   * - instrumental: 是否纯音乐
+   * - lyrics: 歌词（可选）
+   * - model: 生成模型 (suno-v4/v4.5/v5)
+   */
   
   // 来源
   source      AssetSource
@@ -329,7 +359,7 @@ model Asset {
 enum AssetType {
   IMAGE       // 图片
   VIDEO       // 视频
-  AUDIO       // 音频
+  AUDIO       // 🎵 音频（NEW!）
 }
 
 enum AssetSource {
@@ -396,6 +426,11 @@ enum TaskType {
   VIDEO_GEN_TEXT       // 文生视频
   VIDEO_GEN_IMAGE      // 图生视频
   VIDEO_GEN_FRAMES     // 首尾帧生视频
+  
+  // 🎵 音乐生成（NEW!）
+  MUSIC_GEN_SIMPLE     // 文生音乐（简单模式）
+  MUSIC_GEN_CUSTOM     // 自定义歌词生成
+  MUSIC_GEN_INSTRUMENTAL // 纯音乐生成
   
   // 编辑
   IMAGE_EDIT           // 图片编辑

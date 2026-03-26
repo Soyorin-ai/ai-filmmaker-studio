@@ -7,8 +7,8 @@
 ---
 
 **Project:** AI Filmmaker Studio
-**Generated:** 2026-03-06 19:07:32
-**Category:** Podcast Platform
+**Generated:** 2026-03-24 13:03:01
+**Category:** Short Video Editor
 
 ---
 
@@ -18,19 +18,25 @@
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#0F0F23` | `--color-primary` |
-| Secondary | `#1E1B4B` | `--color-secondary` |
-| CTA/Accent | `#E11D48` | `--color-cta` |
-| Background | `#000000` | `--color-background` |
-| Text | `#F8FAFC` | `--color-text` |
+| Primary | `#2563EB` | `--color-primary` |
+| Secondary | `#3B82F6` | `--color-secondary` |
+| CTA/Accent | `#F97316` | `--color-cta` |
+| Background | `#F8FAFC` | `--color-background` |
+| Text | `#1E293B` | `--color-text` |
 
-**Color Notes:** Cinema dark + play red
+**Color Notes:** Video pink on dark + timeline blue
 
 ### Typography
 
-- **Heading Font:** Inter
+- **Heading Font:** Space Grotesk
 - **Body Font:** Inter
-- **Mood:** Modern + Clear typography
+- **Mood:** web3, bitcoin, defi, digital gold, fintech, crypto, trustless, luminescent, precision, dark
+- **Google Fonts:** [Space Grotesk + Inter](https://fonts.google.com/share?selection.family=Inter:wght@400;500;600;700|JetBrains+Mono:wght@400;500|Space+Grotesk:wght@500;600;700)
+
+**CSS Import:**
+```css
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+```
 
 ### Spacing Variables
 
@@ -62,7 +68,7 @@
 ```css
 /* Primary Button */
 .btn-primary {
-  background: #E11D48;
+  background: #F97316;
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -79,8 +85,8 @@
 /* Secondary Button */
 .btn-secondary {
   background: transparent;
-  color: #0F0F23;
-  border: 2px solid #0F0F23;
+  color: #2563EB;
+  border: 2px solid #2563EB;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -93,7 +99,7 @@
 
 ```css
 .card {
-  background: #000000;
+  background: #F8FAFC;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -119,9 +125,9 @@
 }
 
 .input:focus {
-  border-color: #0F0F23;
+  border-color: #2563EB;
   outline: none;
-  box-shadow: 0 0 0 3px #0F0F2320;
+  box-shadow: 0 0 0 3px #2563EB20;
 }
 ```
 
@@ -167,8 +173,7 @@
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Poor audio player
-- ❌ Cluttered layout
+- ❌ Pure white backgrounds
 
 ### Additional Forbidden Patterns
 

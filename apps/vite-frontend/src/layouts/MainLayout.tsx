@@ -4,12 +4,12 @@ import {Footer} from '@/components/footer/footer.component';
 
 export function MainLayout() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="mx-auto my-6 flex w-full max-w-7xl flex-col px-2 md:my-8 md:px-4 lg:my-12 min-h-screen">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-2 py-6 md:px-4 md:py-8 lg:py-12">
         <Outlet />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

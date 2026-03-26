@@ -414,7 +414,140 @@ Content-Type: application/json
 
 ---
 
-## 七、任务接口
+## 七、AI 音乐生成接口（NEW！）
+
+### 7.1 生成音乐（简单模式）
+
+AI 自动生成歌词和旋律。
+
+```http
+POST /ai/generate/music/simple
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "prompt": "一首关于城市爱情的流行歌曲，浪漫温柔",
+  "style": ["pop", "romantic", "ballad"],
+  "mood": "romantic",
+  "duration": 90,
+  "vocalGender": "f",
+  "model": "suno-v4",
+  "projectId": "xxx (可选)",
+  "saveToProject": true
+}
+```
+
+**参数说明**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|-----|------|-----|------|
+| prompt | string | 是 | 音乐描述 |
+| style | string[] | 否 | 风格标签（pop, rock, jazz 等） |
+| mood | string | 否 | 情绪（happy, sad, romantic 等） |
+| duration | number | 否 | 目标时长（30-240秒） |
+| vocalGender | string | 否 | 人声性别：m（男）/ f（女） |
+| model | string | 否 | 模型：suno-v4 / suno-v4.5 / suno-v5 |
+| projectId | string | 否 | 关联项目ID |
+| saveToProject | boolean | 否 | 是否保存到项目 |
+
+**响应**：
+```json
+{
+  "success": true,
+  "data": {
+    "taskId": "task123",
+    "status": "PENDING",
+    "estimatedTime": 60
+  }
+}
+```
+
+### 7.2 生成音乐（自定义歌词）
+
+用户提供歌词，AI 谱曲演唱。
+
+```http
+POST /ai/generate/music/custom
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "lyrics": "[Verse]\n在城市的霓虹灯下\n我们相遇的那个夜晚\n\n[Chorus]\n因为有你，世界变得不同\n因为有你，我找到了方向",
+  "style": ["pop", "ballad", "emotional"],
+  "title": "城市霓虹",
+  "vocalGender": "f",
+  "duration": 120,
+  "model": "suno-v5",
+  "projectId": "xxx (可选)"
+}
+```
+
+**参数说明**：
+
+| 参数 | 类型 | 必填 | 说明 |
+|-----|------|-----|------|
+| lyrics | string | 是 | 歌词（支持 [Verse]/[Chorus]/[Bridge] 标记） |
+| style | string[] | 是 | 风格标签 |
+| title | string | 是 | 歌曲名称（最多80字符） |
+| vocalGender | string | 否 | 人声性别：m（男）/ f（女） |
+| duration | number | 否 | 目标时长（30-240秒） |
+| model | string | 否 | 模型：suno-v4 / suno-v4.5 / suno-v5 |
+| projectId | string | 否 | 关联项目ID |
+
+### 7.3 生成音乐（纯音乐）
+
+生成无歌词的背景音乐。
+
+```http
+POST /ai/generate/music/instrumental
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "prompt": "紧张刺激的动作场景配乐，快节奏，鼓点强烈",
+  "style": ["electronic", "cinematic", "intense"],
+  "mood": "energetic",
+  "duration": 60,
+  "model": "suno-v4.5",
+  "projectId": "xxx (可选)"
+}
+```
+
+### 7.4 获取音乐生成任务结果
+
+```http
+GET /tasks/:id
+Authorization: Bearer {token}
+```
+
+**音乐任务响应**：
+```json
+{
+  "success": true,
+  "data": {
+    "id": "task123",
+    "type": "MUSIC_GEN",
+    "status": "COMPLETED",
+    "progress": 100,
+    "result": {
+      "assetId": "asset456",
+      "title": "城市霓虹",
+      "duration": 118,
+      "style": ["pop", "ballad", "emotional"],
+      "urls": {
+        "audio": "https://...",
+        "cover": "https://..."
+      }
+    },
+    "createdAt": "2026-03-06T10:00:00Z",
+    "completedAt": "2026-03-06T10:01:30Z"
+  }
+}
+```
+
+---
+
+## 八、任务接口
 
 ### 7.1 获取任务状态
 
@@ -457,7 +590,7 @@ POST /tasks/:id/cancel
 Authorization: Bearer {token}
 ```
 
-### 7.4 WebSocket 任务通知
+### 8.4 WebSocket 任务通知
 
 ```javascript
 // 连接
@@ -634,7 +767,7 @@ Content-Type: application/json
 }
 ```
 
-### 11.2 Webhook 载荷
+### 12.2 Webhook 载荷
 
 ```json
 {
@@ -653,3 +786,4 @@ Content-Type: application/json
 
 *文档版本: v1.0*
 *最后更新: 2026-03-06*
+6*
