@@ -2,7 +2,6 @@ import { Helmet } from 'react-helmet-async';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Wand2, 
-  Film, 
   Sparkles, 
   FolderOpen, 
   LogIn, 
@@ -12,7 +11,8 @@ import {
   ChevronRight,
   Play,
   Music,
-  Clapperboard
+  Clapperboard,
+  GitBranch
 } from 'lucide-react';
 import { useMe, useLogout } from '@/hooks/use-auth/use-auth.hook';
 
@@ -48,8 +48,9 @@ export function Home() {
                 <span className="text-white/90 font-medium">{user.email}</span>
               </div>
               <button
-                onClick={handleLogout}
+                type="button"
                 className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center gap-2 border border-transparent hover:border-white/20 cursor-pointer"
+                onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4" />
                 退出
@@ -172,7 +173,7 @@ export function Home() {
           </div>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-4 gap-6 max-w-6xl w-full mb-16">
+          <div className="grid md:grid-cols-5 gap-6 max-w-7xl w-full mb-16">
             {/* AI 生图 */}
             <Link
               to="create/image"
@@ -329,6 +330,46 @@ export function Home() {
                 </div>
                 <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
                   管理你的创作项目和时间线
+                </p>
+              </div>
+            </Link>
+
+            {/* 工作流编排 */}
+            <Link
+              to="workflow"
+              className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.6))',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), transparent)' }}
+              />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-4">
+                  <div 
+                    className="w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #EC4899, #DB2777)',
+                      boxShadow: '0 8px 24px rgba(236, 72, 153, 0.3)'
+                    }}
+                  >
+                    <GitBranch className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="min-h-[3.5rem] flex flex-col justify-center">
+                    <h2 className="text-lg font-semibold text-white flex items-center gap-2 whitespace-nowrap transition-colors duration-300 group-hover:text-pink-400">
+                      工作流编排
+                      <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </h2>
+                    <p className="text-white/40 text-xs font-mono tracking-wider">WORKFLOW_EDITOR</p>
+                  </div>
+                </div>
+                <p className="text-white/50 text-sm leading-relaxed min-h-[2.5rem]">
+                  可视化工作流，自动化创作流程
                 </p>
               </div>
             </Link>
