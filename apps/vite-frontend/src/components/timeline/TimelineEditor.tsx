@@ -1,10 +1,10 @@
 // 时间线编辑器主组件
-import { useReducer, useCallback, useRef, useEffect, useState } from 'react';
-import type { TimelineState, TimelineTrack as TimelineTrackType, TimelineClip } from './types';
-import { defaultTimelineState } from './types';
-import { timelineReducer } from './reducer';
-import { TimelineRuler } from './TimelineRuler';
-import { TimelineTrack } from './TimelineTrack';
+import {useReducer, useCallback, useRef, useEffect, useState} from 'react';
+import type {TimelineState, TimelineTrack as TimelineTrackType, TimelineClip} from './types';
+import {defaultTimelineState} from './types';
+import {timelineReducer} from './reducer';
+import {TimelineRuler} from './TimelineRuler';
+import {TimelineTrack} from './TimelineTrack';
 
 interface TimelineEditorProps {
   projectId: string;
@@ -12,7 +12,7 @@ interface TimelineEditorProps {
   onStateChange?: (state: TimelineState) => void;
 }
 
-export function TimelineEditor({ projectId, initialState, onStateChange }: TimelineEditorProps) {
+export function TimelineEditor({projectId, initialState, onStateChange}: TimelineEditorProps) {
   const [state, dispatch] = useReducer(timelineReducer, {
     ...defaultTimelineState,
     ...initialState,
@@ -21,35 +21,35 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
-  
+
   // 缩放控制
   const [zoom, setZoom] = useState(state.zoom);
-  
+
   useEffect(() => {
-    dispatch({ type: 'SET_ZOOM', payload: zoom });
+    dispatch({type: 'SET_ZOOM', payload: zoom});
   }, [zoom]);
 
   // 播放控制
   const play = useCallback(() => {
     if (state.isPlaying) return;
-    
-    dispatch({ type: 'SET_PLAYING', payload: true });
+
+    dispatch({type: 'SET_PLAYING', payload: true});
     lastTimeRef.current = performance.now();
-    
+
     const animate = (currentTime: number) => {
       const deltaTime = (currentTime - lastTimeRef.current) / 1000;
       lastTimeRef.current = currentTime;
-      
-      dispatch({ type: 'SET_CURRENT_TIME', payload: state.currentTime + deltaTime });
-      
+
+      dispatch({type: 'SET_CURRENT_TIME', payload: state.currentTime + deltaTime});
+
       if (state.currentTime + deltaTime < state.duration) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
-        dispatch({ type: 'SET_PLAYING', payload: false });
-        dispatch({ type: 'SET_CURRENT_TIME', payload: 0 });
+        dispatch({type: 'SET_PLAYING', payload: false});
+        dispatch({type: 'SET_CURRENT_TIME', payload: 0});
       }
     };
-    
+
     animationRef.current = requestAnimationFrame(animate);
   }, [state.isPlaying, state.currentTime, state.duration]);
 
@@ -58,7 +58,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
       cancelAnimationFrame(animationRef.current);
       animationRef.current = null;
     }
-    dispatch({ type: 'SET_PLAYING', payload: false });
+    dispatch({type: 'SET_PLAYING', payload: false});
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -70,7 +70,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
   }, [state.isPlaying, play, pause]);
 
   const seek = useCallback((time: number) => {
-    dispatch({ type: 'SET_CURRENT_TIME', payload: time });
+    dispatch({type: 'SET_CURRENT_TIME', payload: time});
   }, []);
 
   const stepForward = useCallback(() => {
@@ -82,25 +82,28 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
   }, [state.currentTime, seek]);
 
   // 轨道操作
-  const addTrack = useCallback((type: 'video' | 'audio' | 'subtitle') => {
-    const newTrack: TimelineTrackType = {
-      id: `${type}-track-${Date.now()}`,
-      type,
-      name: `${type === 'video' ? '视频' : type === 'audio' ? '音频' : '字幕'}轨道 ${state.tracks.filter(t => t.type === type).length + 1}`,
-      muted: false,
-      locked: false,
-      visible: true,
-      clips: [],
-    };
-    dispatch({ type: 'ADD_TRACK', payload: newTrack });
-  }, [state.tracks]);
+  const addTrack = useCallback(
+    (type: 'video' | 'audio' | 'subtitle') => {
+      const newTrack: TimelineTrackType = {
+        id: `${type}-track-${Date.now()}`,
+        type,
+        name: `${type === 'video' ? '视频' : type === 'audio' ? '音频' : '字幕'}轨道 ${state.tracks.filter((t) => t.type === type).length + 1}`,
+        muted: false,
+        locked: false,
+        visible: true,
+        clips: [],
+      };
+      dispatch({type: 'ADD_TRACK', payload: newTrack});
+    },
+    [state.tracks],
+  );
 
   const removeTrack = useCallback((trackId: string) => {
-    dispatch({ type: 'REMOVE_TRACK', payload: trackId });
+    dispatch({type: 'REMOVE_TRACK', payload: trackId});
   }, []);
 
   const updateTrack = useCallback((trackId: string, updates: Partial<TimelineTrackType>) => {
-    dispatch({ type: 'UPDATE_TRACK', payload: { id: trackId, updates } });
+    dispatch({type: 'UPDATE_TRACK', payload: {id: trackId, updates}});
   }, []);
 
   // 片段操作
@@ -110,29 +113,32 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
       id: `clip-${Date.now()}`,
       trackId,
     };
-    dispatch({ type: 'ADD_CLIP', payload: { trackId, clip: newClip } });
+    dispatch({type: 'ADD_CLIP', payload: {trackId, clip: newClip}});
   }, []);
 
   const removeClip = useCallback((trackId: string, clipId: string) => {
-    dispatch({ type: 'REMOVE_CLIP', payload: { trackId, clipId } });
+    dispatch({type: 'REMOVE_CLIP', payload: {trackId, clipId}});
   }, []);
 
   const updateClip = useCallback((trackId: string, clipId: string, updates: Partial<TimelineClip>) => {
-    dispatch({ type: 'UPDATE_CLIP', payload: { trackId, clipId, updates } });
+    dispatch({type: 'UPDATE_CLIP', payload: {trackId, clipId, updates}});
   }, []);
 
-  const moveClip = useCallback((clipId: string, newStartTime: number) => {
-    // 找到片段所在的轨道
-    const track = state.tracks.find(t => t.clips.some(c => c.id === clipId));
-    if (!track) return;
-    
-    // 更新开始时间
-    updateClip(track.id, clipId, { startTime: newStartTime });
-  }, [state.tracks, updateClip]);
+  const moveClip = useCallback(
+    (clipId: string, newStartTime: number) => {
+      // 找到片段所在的轨道
+      const track = state.tracks.find((t) => t.clips.some((c) => c.id === clipId));
+      if (!track) return;
+
+      // 更新开始时间
+      updateClip(track.id, clipId, {startTime: newStartTime});
+    },
+    [state.tracks, updateClip],
+  );
 
   // 选择
   const selectClip = useCallback((clipId: string | null) => {
-    dispatch({ type: 'SET_SELECTED_CLIP', payload: clipId });
+    dispatch({type: 'SET_SELECTED_CLIP', payload: clipId});
   }, []);
 
   // 导出状态变化
@@ -164,7 +170,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
         case 'Delete':
         case 'Backspace':
           if (state.selectedClipId) {
-            const track = state.tracks.find(t => t.clips.some(c => c.id === state.selectedClipId));
+            const track = state.tracks.find((t) => t.clips.some((c) => c.id === state.selectedClipId));
             if (track && !track.locked) {
               removeClip(track.id, state.selectedClipId);
             }
@@ -172,10 +178,10 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
           break;
         case '+':
         case '=':
-          setZoom(z => Math.min(z + 10, 200));
+          setZoom((z) => Math.min(z + 10, 200));
           break;
         case '-':
-          setZoom(z => Math.max(z - 10, 10));
+          setZoom((z) => Math.max(z - 10, 10));
           break;
       }
     };
@@ -192,11 +198,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
       <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
         {/* 播放控制 */}
         <div className="flex items-center gap-2">
-          <button
-            className="p-2 hover:bg-slate-700 rounded"
-            onClick={stepBackward}
-            title="后退1秒 (←)"
-          >
+          <button className="p-2 hover:bg-slate-700 rounded" onClick={stepBackward} title="后退1秒 (←)">
             ⏮
           </button>
           <button
@@ -206,11 +208,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
           >
             {state.isPlaying ? '⏸' : '▶️'}
           </button>
-          <button
-            className="p-2 hover:bg-slate-700 rounded"
-            onClick={stepForward}
-            title="前进1秒 (→)"
-          >
+          <button className="p-2 hover:bg-slate-700 rounded" onClick={stepForward} title="前进1秒 (→)">
             ⏭
           </button>
           <span className="text-sm text-slate-400 ml-2">
@@ -222,7 +220,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
         <div className="flex items-center gap-2">
           <button
             className="px-2 py-1 text-sm bg-slate-700 hover:bg-slate-600 rounded"
-            onClick={() => setZoom(z => Math.max(z - 10, 10))}
+            onClick={() => setZoom((z) => Math.max(z - 10, 10))}
           >
             ➖
           </button>
@@ -236,7 +234,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
           />
           <button
             className="px-2 py-1 text-sm bg-slate-700 hover:bg-slate-600 rounded"
-            onClick={() => setZoom(z => Math.min(z + 10, 200))}
+            onClick={() => setZoom((z) => Math.min(z + 10, 200))}
           >
             ➕
           </button>
@@ -245,10 +243,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
 
         {/* 添加轨道 */}
         <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-500 rounded"
-            onClick={() => addTrack('video')}
-          >
+          <button className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-500 rounded" onClick={() => addTrack('video')}>
             + 视频轨道
           </button>
           <button
@@ -272,16 +267,11 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
           {/* 时间刻度尺 */}
           <div className="flex sticky top-0 z-20">
             <div className="w-48 flex-shrink-0 bg-slate-800 border-b border-r border-slate-700" />
-            <TimelineRuler
-              duration={state.duration}
-              zoom={state.zoom}
-              currentTime={state.currentTime}
-              onSeek={seek}
-            />
+            <TimelineRuler duration={state.duration} zoom={state.zoom} currentTime={state.currentTime} onSeek={seek} />
           </div>
 
           {/* 轨道列表 */}
-          {state.tracks.map(track => (
+          {state.tracks.map((track) => (
             <TimelineTrack
               key={track.id}
               track={track}
@@ -295,9 +285,9 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
               onSelectClip={selectClip}
               onUpdateClip={(clipId, updates) => updateClip(track.id, clipId, updates)}
               onMoveClip={moveClip}
-              onToggleMute={() => updateTrack(track.id, { muted: !track.muted })}
-              onToggleLock={() => updateTrack(track.id, { locked: !track.locked })}
-              onToggleVisibility={() => updateTrack(track.id, { visible: !track.visible })}
+              onToggleMute={() => updateTrack(track.id, {muted: !track.muted})}
+              onToggleLock={() => updateTrack(track.id, {locked: !track.locked})}
+              onToggleVisibility={() => updateTrack(track.id, {visible: !track.visible})}
               onDeleteTrack={() => removeTrack(track.id)}
             />
           ))}
@@ -314,7 +304,7 @@ export function TimelineEditor({ projectId, initialState, onStateChange }: Timel
             <input
               type="checkbox"
               checked={state.snapToGrid}
-              onChange={(e) => dispatch({ type: 'SET_ZOOM', payload: state.zoom })} // 临时占位，实际应该有 SET_SNAP_TO_GRID
+              onChange={(e) => dispatch({type: 'SET_ZOOM', payload: state.zoom})} // 临时占位，实际应该有 SET_SNAP_TO_GRID
             />
             吸附到网格
           </label>

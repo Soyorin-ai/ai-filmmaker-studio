@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { X, Wrench } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { WorkflowNode, WorkflowNodeType } from './types';
+import {useState} from 'react';
+import {X, Wrench} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Label} from '@/components/ui/label';
+import {Textarea} from '@/components/ui/textarea';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import type {WorkflowNode, WorkflowNodeType} from './types';
 
 interface NodeConfigPanelProps {
   node: WorkflowNode | null;
@@ -32,7 +32,7 @@ const nodeTypeLabels: Record<WorkflowNodeType, string> = {
   export: '导出节点',
 };
 
-export function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProps) {
+export function NodeConfigPanel({node, onClose, onUpdate}: NodeConfigPanelProps) {
   const [localData, setLocalData] = useState(node?.data ?? {});
 
   if (!node) {
@@ -52,7 +52,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProp
   }
 
   const handleUpdate = (key: string, value: string | number | boolean) => {
-    const newData = { ...localData, [key]: value };
+    const newData = {...localData, [key]: value};
     setLocalData(newData);
     onUpdate(node.id, newData as Partial<WorkflowNode['data']>);
   };
@@ -66,14 +66,8 @@ export function NodeConfigPanel({ node, onClose, onUpdate }: NodeConfigPanelProp
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white">
-          {nodeTypeLabels[node.type as WorkflowNodeType]}
-        </h3>
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1 rounded hover:bg-white/10 transition-colors"
-        >
+        <h3 className="text-sm font-medium text-white">{nodeTypeLabels[node.type as WorkflowNodeType]}</h3>
+        <button type="button" onClick={onClose} className="p-1 rounded hover:bg-white/10 transition-colors">
           <X className="w-4 h-4 text-white/60" />
         </button>
       </div>

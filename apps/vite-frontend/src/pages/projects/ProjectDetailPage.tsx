@@ -1,6 +1,6 @@
-import { Helmet } from 'react-helmet-async';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useParams, Link, useNavigate} from 'react-router-dom';
+import {useState, useEffect} from 'react';
 import {
   ArrowLeft,
   Settings,
@@ -15,17 +15,11 @@ import {
   Edit3,
   FolderOpen,
 } from 'lucide-react';
-import {
-  projectsApi,
-  Project,
-  ProjectStatus,
-  getProjectStatusLabel,
-  getProjectStatusColor,
-} from '../../api/projects';
-import { assetsApi, Asset } from '../../api/assets';
+import {projectsApi, Project, ProjectStatus, getProjectStatusLabel, getProjectStatusColor} from '../../api/projects';
+import {assetsApi, Asset} from '../../api/assets';
 
 export function ProjectDetailPage() {
-  const { locale, id } = useParams<{ locale: string; id: string }>();
+  const {locale, id} = useParams<{locale: string; id: string}>();
   const navigate = useNavigate();
 
   // State
@@ -145,16 +139,10 @@ export function ProjectDetailPage() {
                   <h1 className="text-xl font-bold text-white">{project.name}</h1>
                 )}
                 <div className="flex items-center gap-3 mt-1">
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs text-white ${getProjectStatusColor(
-                      project.status,
-                    )}`}
-                  >
+                  <span className={`px-2 py-0.5 rounded text-xs text-white ${getProjectStatusColor(project.status)}`}>
                     {getProjectStatusLabel(project.status)}
                   </span>
-                  <span className="text-xs text-slate-500">
-                    更新于 {formatDate(project.updatedAt)}
-                  </span>
+                  <span className="text-xs text-slate-500">更新于 {formatDate(project.updatedAt)}</span>
                 </div>
               </div>
             </div>
@@ -245,9 +233,7 @@ export function ProjectDetailPage() {
               <div className="text-slate-300 text-sm font-medium flex items-center gap-2">
                 <Clock className="w-4 h-4" /> 时长
               </div>
-              <div className="text-2xl font-bold text-cyan-400 mt-1">
-                {formatDuration(project.duration)}
-              </div>
+              <div className="text-2xl font-bold text-cyan-400 mt-1">{formatDuration(project.duration)}</div>
             </div>
             <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
               <div className="text-slate-300 text-sm font-medium">工作流版本</div>
@@ -333,10 +319,7 @@ export function ProjectDetailPage() {
                   {project.tasks && project.tasks.length > 0 ? (
                     <div className="space-y-3">
                       {project.tasks.slice(0, 5).map((task: any) => (
-                        <div
-                          key={task.id}
-                          className="p-3 bg-slate-900 rounded-lg border border-slate-700"
-                        >
+                        <div key={task.id} className="p-3 bg-slate-900 rounded-lg border border-slate-700">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-white truncate">{task.type}</span>
                             <span
@@ -353,9 +336,7 @@ export function ProjectDetailPage() {
                               {task.status}
                             </span>
                           </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            {formatDate(task.createdAt)}
-                          </div>
+                          <div className="text-xs text-slate-500 mt-1">{formatDate(task.createdAt)}</div>
                         </div>
                       ))}
                     </div>
@@ -378,9 +359,7 @@ export function ProjectDetailPage() {
                       <Image className="w-5 h-5 text-rose-400" />
                     </div>
                     <div>
-                      <div className="text-white font-medium group-hover:text-rose-400 transition-colors">
-                        生成图片
-                      </div>
+                      <div className="text-white font-medium group-hover:text-rose-400 transition-colors">生成图片</div>
                       <div className="text-xs text-slate-500">AI 文生图 / 图生图</div>
                     </div>
                   </div>

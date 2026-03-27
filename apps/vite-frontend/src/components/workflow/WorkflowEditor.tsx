@@ -26,11 +26,7 @@ interface WorkflowEditorProps {
   onChange?: (nodes: Node<WorkflowNodeData>[], edges: Edge[]) => void;
 }
 
-export function WorkflowEditor({
-  initialNodes = [],
-  initialEdges = [],
-  onChange,
-}: WorkflowEditorProps) {
+export function WorkflowEditor({initialNodes = [], initialEdges = [], onChange}: WorkflowEditorProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
@@ -44,12 +40,9 @@ export function WorkflowEditor({
   );
 
   // 选中节点
-  const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
-      setSelectedNode(node);
-    },
-    [],
-  );
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
+    setSelectedNode(node);
+  }, []);
 
   // 点击空白处取消选中
   const onPaneClick = useCallback(() => {
@@ -117,9 +110,7 @@ export function WorkflowEditor({
       );
       // 更新选中节点
       if (selectedNode?.id === nodeId) {
-        setSelectedNode((prev) =>
-          prev ? {...prev, data: {...prev.data, ...data} as WorkflowNodeData} : null,
-        );
+        setSelectedNode((prev) => (prev ? {...prev, data: {...prev.data, ...data} as WorkflowNodeData} : null));
       }
     },
     [setNodes, selectedNode],
@@ -205,11 +196,7 @@ export function WorkflowEditor({
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1E293B" />
         <Controls className="!bg-slate-800 !border-white/10" />
-        <MiniMap
-          nodeColor={nodeColor}
-          className="!bg-slate-800 !border-white/10"
-          maskColor="rgba(0, 0, 0, 0.8)"
-        />
+        <MiniMap nodeColor={nodeColor} className="!bg-slate-800 !border-white/10" maskColor="rgba(0, 0, 0, 0.8)" />
 
         {/* 左侧节点面板 */}
         <Panel position="top-left" className="m-2">

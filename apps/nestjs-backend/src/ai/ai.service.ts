@@ -107,9 +107,7 @@ export class AiService {
 
   constructor(private readonly configService: ConfigService) {
     this.dmxApiKey = this.configService.get<string>('DMX_API_KEY') ?? '';
-    const dmxApiBaseUrl =
-      this.configService.get<string>('DMX_API_BASE_URL') ??
-      'https://www.dmxapi.cn';
+    const dmxApiBaseUrl = this.configService.get<string>('DMX_API_BASE_URL') ?? 'https://www.dmxapi.cn';
 
     this.dmxApiClient = axios.create({
       baseURL: dmxApiBaseUrl,
@@ -197,8 +195,7 @@ export class AiService {
       this.logger.error('Image generation failed:', error);
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -218,11 +215,7 @@ export class AiService {
       // 根据类型添加不同的输入
       if (params.type === 'image2video' && params.firstFrameImage) {
         input.first_frame_image = params.firstFrameImage;
-      } else if (
-        params.type === 'frame2video' &&
-        params.firstFrameImage &&
-        params.lastFrameImage
-      ) {
+      } else if (params.type === 'frame2video' && params.firstFrameImage && params.lastFrameImage) {
         input.first_frame_image = params.firstFrameImage;
         input.last_frame_image = params.lastFrameImage;
       }
@@ -240,10 +233,7 @@ export class AiService {
         },
       };
 
-      const response = await this.dmxApiClient.post<SeedanceResponse>(
-        '/v1/responses',
-        requestBody,
-      );
+      const response = await this.dmxApiClient.post<SeedanceResponse>('/v1/responses', requestBody);
 
       // Seedance API 返回任务 ID，需要轮询查询状态
       const taskId = response.data?.id ?? response.data?.task_id;
@@ -264,8 +254,7 @@ export class AiService {
       this.logger.error('Video generation failed:', error);
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -275,9 +264,7 @@ export class AiService {
    */
   async getVideoTaskStatus(taskId: string): Promise<VideoTaskStatus> {
     try {
-      const response = await this.dmxApiClient.get<SeedanceTaskResponse>(
-        `/v1/responses/${taskId}?model=seedance-get`,
-      );
+      const response = await this.dmxApiClient.get<SeedanceTaskResponse>(`/v1/responses/${taskId}?model=seedance-get`);
 
       const data = response.data;
       const apiStatus = data.status ?? '';
@@ -305,8 +292,7 @@ export class AiService {
       return {
         taskId,
         status: 'failed',
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -344,19 +330,14 @@ export class AiService {
       }
 
       // Evolink API
-      const evolinkApiKey =
-        this.configService.get<string>('EVOLINK_API_KEY') ?? '';
-      const response = await axios.post<EvolinkResponse>(
-        'https://api.evolink.ai/v1/audios/generations',
-        requestBody,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${evolinkApiKey}`,
-          },
-          timeout: 30000,
+      const evolinkApiKey = this.configService.get<string>('EVOLINK_API_KEY') ?? '';
+      const response = await axios.post<EvolinkResponse>('https://api.evolink.ai/v1/audios/generations', requestBody, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${evolinkApiKey}`,
         },
-      );
+        timeout: 30000,
+      });
 
       const taskId = response.data?.id ?? response.data?.task_id;
 
@@ -376,8 +357,7 @@ export class AiService {
       this.logger.error('Music generation failed:', error);
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }
@@ -387,17 +367,13 @@ export class AiService {
    */
   async getMusicTaskStatus(taskId: string): Promise<MusicTaskStatus> {
     try {
-      const evolinkApiKey =
-        this.configService.get<string>('EVOLINK_API_KEY') ?? '';
-      const response = await axios.get<EvolinkTaskResponse>(
-        `https://api.evolink.ai/v1/tasks/${taskId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${evolinkApiKey}`,
-          },
-          timeout: 30000,
+      const evolinkApiKey = this.configService.get<string>('EVOLINK_API_KEY') ?? '';
+      const response = await axios.get<EvolinkTaskResponse>(`https://api.evolink.ai/v1/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${evolinkApiKey}`,
         },
-      );
+        timeout: 30000,
+      });
 
       const data = response.data;
       const apiStatus = data.status ?? '';
@@ -431,8 +407,7 @@ export class AiService {
       return {
         taskId,
         status: 'failed',
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       };
     }
   }

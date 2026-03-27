@@ -1,20 +1,9 @@
-import { memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
-import {
-  Type,
-  Image,
-  Video,
-  Music,
-  Combine,
-  Download,
-  Wrench,
-} from 'lucide-react';
-import type { WorkflowNodeData, WorkflowNodeType } from './types';
+import {memo} from 'react';
+import {Handle, Position, type NodeProps} from '@xyflow/react';
+import {Type, Image, Video, Music, Combine, Download, Wrench} from 'lucide-react';
+import type {WorkflowNodeData, WorkflowNodeType} from './types';
 
-const nodeConfig: Record<
-  WorkflowNodeType,
-  { icon: React.ElementType; color: string; bgColor: string }
-> = {
+const nodeConfig: Record<WorkflowNodeType, {icon: React.ElementType; color: string; bgColor: string}> = {
   input: {
     icon: Type,
     color: '#3B82F6',
@@ -51,7 +40,7 @@ interface WorkflowNodeProps extends NodeProps<WorkflowNodeData> {
   nodeType: WorkflowNodeType;
 }
 
-function WorkflowNodeComponent({ data, nodeType, selected }: WorkflowNodeProps) {
+function WorkflowNodeComponent({data, nodeType, selected}: WorkflowNodeProps) {
   const config = nodeConfig[nodeType];
   const Icon = config.icon;
   const label = data.label ?? nodeType;
@@ -80,18 +69,13 @@ function WorkflowNodeComponent({ data, nodeType, selected }: WorkflowNodeProps) 
 
       {/* 节点内容 */}
       <div className="flex items-center gap-3">
-        <div
-          className="p-2 rounded-lg"
-          style={{ background: config.bgColor }}
-        >
-          <Icon className="w-4 h-4" style={{ color: config.color }} />
+        <div className="p-2 rounded-lg" style={{background: config.bgColor}}>
+          <Icon className="w-4 h-4" style={{color: config.color}} />
         </div>
         <div>
           <div className="text-sm font-medium text-white">{label}</div>
           {'prompt' in data && data.prompt && (
-            <div className="text-xs text-white/40 truncate max-w-[120px]">
-              {data.prompt}
-            </div>
+            <div className="text-xs text-white/40 truncate max-w-[120px]">{data.prompt}</div>
           )}
         </div>
       </div>
@@ -100,7 +84,7 @@ function WorkflowNodeComponent({ data, nodeType, selected }: WorkflowNodeProps) 
       <button
         type="button"
         className="absolute top-2 right-2 p-1 rounded opacity-0 hover:opacity-100 transition-opacity"
-        style={{ background: 'rgba(255, 255, 255, 0.1)' }}
+        style={{background: 'rgba(255, 255, 255, 0.1)'}}
       >
         <Wrench className="w-3 h-3 text-white/60" />
       </button>
@@ -122,29 +106,17 @@ function WorkflowNodeComponent({ data, nodeType, selected }: WorkflowNodeProps) 
 }
 
 // 创建各个节点类型
-export const InputNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="input" />
-));
+export const InputNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="input" />);
 
-export const ImageGenNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="imageGen" />
-));
+export const ImageGenNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="imageGen" />);
 
-export const VideoGenNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="videoGen" />
-));
+export const VideoGenNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="videoGen" />);
 
-export const MusicGenNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="musicGen" />
-));
+export const MusicGenNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="musicGen" />);
 
-export const MergeNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="merge" />
-));
+export const MergeNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="merge" />);
 
-export const ExportNode = memo((props: NodeProps) => (
-  <WorkflowNodeComponent {...props} nodeType="export" />
-));
+export const ExportNode = memo((props: NodeProps) => <WorkflowNodeComponent {...props} nodeType="export" />);
 
 export const nodeTypes = {
   input: InputNode,

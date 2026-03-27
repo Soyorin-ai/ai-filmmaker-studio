@@ -10,10 +10,10 @@ export interface TimelineClip {
   assetId: string;
   name: string;
   // 时间信息（秒）
-  startTime: number;  // 在时间线上的开始时间
-  duration: number;   // 片段时长
-  trimStart: number;  // 裁剪开始点（相对于素材）
-  trimEnd: number;    // 裁剪结束点（相对于素材）
+  startTime: number; // 在时间线上的开始时间
+  duration: number; // 片段时长
+  trimStart: number; // 裁剪开始点（相对于素材）
+  trimEnd: number; // 裁剪结束点（相对于素材）
   // 素材信息
   assetUrl: string;
   assetType: 'image' | 'video' | 'audio';
@@ -45,11 +45,11 @@ export interface TimelineTrack {
 // 时间线状态
 export interface TimelineState {
   tracks: TimelineTrack[];
-  duration: number;        // 总时长
-  currentTime: number;     // 当前播放时间
-  zoom: number;            // 缩放级别 (pixels per second)
-  snapToGrid: boolean;     // 是否吸附到网格
-  gridSize: number;        // 网格大小（秒）
+  duration: number; // 总时长
+  currentTime: number; // 当前播放时间
+  zoom: number; // 缩放级别 (pixels per second)
+  snapToGrid: boolean; // 是否吸附到网格
+  gridSize: number; // 网格大小（秒）
   selectedClipId: string | null;
   selectedTrackId: string | null;
   isPlaying: boolean;
@@ -57,19 +57,19 @@ export interface TimelineState {
 
 // 时间线操作
 export type TimelineAction =
-  | { type: 'SET_TRACKS'; payload: TimelineTrack[] }
-  | { type: 'ADD_TRACK'; payload: TimelineTrack }
-  | { type: 'REMOVE_TRACK'; payload: string }
-  | { type: 'UPDATE_TRACK'; payload: { id: string; updates: Partial<TimelineTrack> } }
-  | { type: 'ADD_CLIP'; payload: { trackId: string; clip: TimelineClip } }
-  | { type: 'REMOVE_CLIP'; payload: { trackId: string; clipId: string } }
-  | { type: 'UPDATE_CLIP'; payload: { trackId: string; clipId: string; updates: Partial<TimelineClip> } }
-  | { type: 'MOVE_CLIP'; payload: { clipId: string; targetTrackId: string; newStartTime: number } }
-  | { type: 'SET_CURRENT_TIME'; payload: number }
-  | { type: 'SET_ZOOM'; payload: number }
-  | { type: 'SET_SELECTED_CLIP'; payload: string | null }
-  | { type: 'SET_PLAYING'; payload: boolean }
-  | { type: 'SET_DURATION'; payload: number };
+  | {type: 'SET_TRACKS'; payload: TimelineTrack[]}
+  | {type: 'ADD_TRACK'; payload: TimelineTrack}
+  | {type: 'REMOVE_TRACK'; payload: string}
+  | {type: 'UPDATE_TRACK'; payload: {id: string; updates: Partial<TimelineTrack>}}
+  | {type: 'ADD_CLIP'; payload: {trackId: string; clip: TimelineClip}}
+  | {type: 'REMOVE_CLIP'; payload: {trackId: string; clipId: string}}
+  | {type: 'UPDATE_CLIP'; payload: {trackId: string; clipId: string; updates: Partial<TimelineClip>}}
+  | {type: 'MOVE_CLIP'; payload: {clipId: string; targetTrackId: string; newStartTime: number}}
+  | {type: 'SET_CURRENT_TIME'; payload: number}
+  | {type: 'SET_ZOOM'; payload: number}
+  | {type: 'SET_SELECTED_CLIP'; payload: string | null}
+  | {type: 'SET_PLAYING'; payload: boolean}
+  | {type: 'SET_DURATION'; payload: number};
 
 // 默认时间线状态
 export const defaultTimelineState: TimelineState = {

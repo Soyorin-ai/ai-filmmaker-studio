@@ -60,9 +60,7 @@ export class AiController {
 
   @Post('image/generate')
   @ApiOperation({summary: '生成图片'})
-  async generateImage(
-    @Body() dto: CreateImageTaskDto,
-  ): Promise<ApiResponse<ImageGenResponse>> {
+  async generateImage(@Body() dto: CreateImageTaskDto): Promise<ApiResponse<ImageGenResponse>> {
     const result = await this.aiService.generateImage({
       prompt: dto.prompt,
       negativePrompt: dto.negativePrompt,
@@ -88,9 +86,7 @@ export class AiController {
 
   @Post('video/generate')
   @ApiOperation({summary: '生成视频'})
-  async generateVideo(
-    @Body() dto: CreateVideoTaskDto,
-  ): Promise<ApiResponse<VideoGenResponse>> {
+  async generateVideo(@Body() dto: CreateVideoTaskDto): Promise<ApiResponse<VideoGenResponse>> {
     const result = await this.aiService.generateVideo({
       prompt: dto.prompt,
       type: dto.type,
@@ -115,9 +111,7 @@ export class AiController {
 
   @Get('video/task/:taskId')
   @ApiOperation({summary: '查询视频任务状态'})
-  async getVideoTaskStatus(
-    @Param('taskId') taskId: string,
-  ): Promise<ApiResponse<VideoTaskResponse>> {
+  async getVideoTaskStatus(@Param('taskId') taskId: string): Promise<ApiResponse<VideoTaskResponse>> {
     const result = await this.aiService.getVideoTaskStatus(taskId);
 
     return {
@@ -131,9 +125,7 @@ export class AiController {
 
   @Post('music/generate')
   @ApiOperation({summary: '生成音乐'})
-  async generateMusic(
-    @Body() dto: CreateMusicTaskDto,
-  ): Promise<ApiResponse<MusicGenResponse>> {
+  async generateMusic(@Body() dto: CreateMusicTaskDto): Promise<ApiResponse<MusicGenResponse>> {
     const result = await this.aiService.generateMusic({
       prompt: dto.prompt,
       mode: dto.mode,
@@ -159,9 +151,7 @@ export class AiController {
 
   @Get('music/task/:taskId')
   @ApiOperation({summary: '查询音乐任务状态'})
-  async getMusicTaskStatus(
-    @Param('taskId') taskId: string,
-  ): Promise<ApiResponse<MusicTaskResponse>> {
+  async getMusicTaskStatus(@Param('taskId') taskId: string): Promise<ApiResponse<MusicTaskResponse>> {
     const result = await this.aiService.getMusicTaskStatus(taskId);
 
     return {

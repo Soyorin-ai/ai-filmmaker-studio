@@ -1,15 +1,15 @@
 // 时间线编辑器页面
-import { useState, useCallback, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { TimelineEditor } from '../../components/timeline';
-import { AssetPanel } from '../../components/timeline/AssetPanel';
-import type { TimelineState } from '../../components/timeline';
-import { projectsApi, Project } from '../../api/projects';
-import type { Asset } from '../../api/assets';
-import { ArrowLeft, Clock, Save } from 'lucide-react';
+import {useState, useCallback, useEffect} from 'react';
+import {useParams, Link} from 'react-router-dom';
+import {TimelineEditor} from '../../components/timeline';
+import {AssetPanel} from '../../components/timeline/AssetPanel';
+import type {TimelineState} from '../../components/timeline';
+import {projectsApi, Project} from '../../api/projects';
+import type {Asset} from '../../api/assets';
+import {ArrowLeft, Clock, Save} from 'lucide-react';
 
 export function TimelinePage() {
-  const { locale, id } = useParams<{ locale: string; id: string }>();
+  const {locale, id} = useParams<{locale: string; id: string}>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -18,7 +18,7 @@ export function TimelinePage() {
   // 加载项目数据
   useEffect(() => {
     if (!id) return;
-    
+
     const loadProject = async () => {
       try {
         const data = await projectsApi.getProject(id);
@@ -29,23 +29,26 @@ export function TimelinePage() {
         setLoading(false);
       }
     };
-    
+
     loadProject();
   }, [id]);
 
   // 保存时间线状态
-  const handleStateChange = useCallback(async (state: TimelineState) => {
-    if (!id || saving) return;
-    
-    setSaving(true);
-    try {
-      await projectsApi.updateTimeline(id, state as Record<string, unknown>);
-    } catch (error) {
-      console.error('Failed to save timeline:', error);
-    } finally {
-      setSaving(false);
-    }
-  }, [id, saving]);
+  const handleStateChange = useCallback(
+    async (state: TimelineState) => {
+      if (!id || saving) return;
+
+      setSaving(true);
+      try {
+        await projectsApi.updateTimeline(id, state as Record<string, unknown>);
+      } catch (error) {
+        console.error('Failed to save timeline:', error);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [id, saving],
+  );
 
   // 添加素材到时间线
   const handleSelectAsset = useCallback(async (asset: Asset) => {
@@ -92,7 +95,7 @@ export function TimelinePage() {
             时间线编辑器
           </span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {saving && (
             <span className="text-xs text-slate-400 flex items-center gap-1">
@@ -103,9 +106,7 @@ export function TimelinePage() {
           <button
             onClick={() => setShowAssetPanel(!showAssetPanel)}
             className={`px-3 py-1.5 text-sm rounded transition-colors ${
-              showAssetPanel
-                ? 'bg-purple-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              showAssetPanel ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
             }`}
           >
             {showAssetPanel ? '隐藏素材' : '显示素材'}
@@ -128,12 +129,7 @@ export function TimelinePage() {
         </div>
 
         {/* 素材面板 */}
-        {showAssetPanel && (
-          <AssetPanel
-            projectId={id}
-            onSelectAsset={handleSelectAsset}
-          />
-        )}
+        {showAssetPanel && <AssetPanel projectId={id} onSelectAsset={handleSelectAsset} />}
       </div>
     </div>
   );

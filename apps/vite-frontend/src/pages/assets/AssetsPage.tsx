@@ -1,6 +1,6 @@
-import { Helmet } from 'react-helmet-async';
-import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useParams, Link} from 'react-router-dom';
+import {useState, useEffect, useCallback} from 'react';
 import {
   Image,
   Video,
@@ -16,7 +16,7 @@ import {
   X,
   FolderOpen,
 } from 'lucide-react';
-import { assetsApi, Asset, AssetType, AssetStats } from '../../api/assets';
+import {assetsApi, Asset, AssetType, AssetStats} from '../../api/assets';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -40,7 +40,7 @@ const sourceLabels: Record<string, string> = {
 };
 
 export function AssetsPage() {
-  const { locale } = useParams<{ locale: string }>();
+  const {locale} = useParams<{locale: string}>();
 
   // State
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -86,10 +86,7 @@ export function AssetsPage() {
   // Load stats and tags
   const loadStatsAndTags = useCallback(async () => {
     try {
-      const [statsResult, tagsResult] = await Promise.all([
-        assetsApi.getStats(),
-        assetsApi.getUserTags(),
-      ]);
+      const [statsResult, tagsResult] = await Promise.all([assetsApi.getStats(), assetsApi.getUserTags()]);
       setStats(statsResult);
       setTags(tagsResult || []);
     } catch (error) {
@@ -205,11 +202,19 @@ export function AssetsPage() {
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
-                <FolderOpen className="w-8 h-8 text-rose-500" style={{ filter: 'drop-shadow(0 0 10px rgba(244,63,94,0.5))' }} />
+              <h1
+                className="text-3xl font-bold text-white flex items-center gap-3"
+                style={{textShadow: '0 2px 8px rgba(0,0,0,0.8)'}}
+              >
+                <FolderOpen
+                  className="w-8 h-8 text-rose-500"
+                  style={{filter: 'drop-shadow(0 0 10px rgba(244,63,94,0.5))'}}
+                />
                 素材库
               </h1>
-              <p className="text-slate-200 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>管理你的所有图片和视频素材</p>
+              <p className="text-slate-200 mt-1" style={{textShadow: '0 1px 4px rgba(0,0,0,0.5)'}}>
+                管理你的所有图片和视频素材
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -220,9 +225,7 @@ export function AssetsPage() {
                   }
                 }}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isSelectMode
-                    ? 'bg-rose-500 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  isSelectMode ? 'bg-rose-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
                 {isSelectMode ? '取消选择' : '批量管理'}
@@ -257,9 +260,7 @@ export function AssetsPage() {
               </div>
               <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
                 <div className="text-slate-300 text-sm font-medium">存储空间</div>
-                <div className="text-2xl font-bold text-cyan-400 mt-1">
-                  {formatFileSize(stats.storageUsed)}
-                </div>
+                <div className="text-2xl font-bold text-cyan-400 mt-1">{formatFileSize(stats.storageUsed)}</div>
               </div>
             </div>
           )}
@@ -285,7 +286,7 @@ export function AssetsPage() {
             <select
               value={selectedType || ''}
               onChange={(e) => {
-                setSelectedType(e.target.value as AssetType || null);
+                setSelectedType((e.target.value as AssetType) || null);
                 setPage(1);
               }}
               className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-rose-500"
@@ -346,9 +347,7 @@ export function AssetsPage() {
           {/* Selection actions */}
           {isSelectMode && (
             <div className="mt-4 flex items-center gap-4 p-3 bg-slate-800/80 rounded-lg border border-slate-700">
-              <span className="text-slate-300">
-                已选择 {selectedIds.size} 项
-              </span>
+              <span className="text-slate-300">已选择 {selectedIds.size} 项</span>
               <button
                 onClick={selectAll}
                 className="px-3 py-1 text-sm bg-slate-700 text-slate-300 rounded hover:bg-slate-600"
@@ -403,9 +402,7 @@ export function AssetsPage() {
                     key={asset.id}
                     onClick={isSelectMode ? () => toggleSelect(asset.id) : undefined}
                     className={`group relative bg-slate-800/50 rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'border-rose-500 ring-2 ring-rose-500/50'
-                        : 'border-slate-700 hover:border-slate-600'
+                      isSelected ? 'border-rose-500 ring-2 ring-rose-500/50' : 'border-slate-700 hover:border-slate-600'
                     }`}
                   >
                     {/* Thumbnail */}
@@ -418,11 +415,7 @@ export function AssetsPage() {
                         />
                       ) : asset.type === 'VIDEO' ? (
                         asset.thumbnail ? (
-                          <img
-                            src={asset.thumbnail}
-                            alt={asset.name}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={asset.thumbnail} alt={asset.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-900/50 to-pink-900/50">
                             <Video className="w-12 h-12 text-slate-500" />
@@ -459,9 +452,7 @@ export function AssetsPage() {
                             className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
                           >
                             <Heart
-                              className={`w-5 h-5 ${
-                                asset.isFavorite ? 'text-rose-500 fill-current' : 'text-white'
-                              }`}
+                              className={`w-5 h-5 ${asset.isFavorite ? 'text-rose-500 fill-current' : 'text-white'}`}
                             />
                           </button>
                           <button
@@ -484,18 +475,13 @@ export function AssetsPage() {
                     <div className="p-2">
                       <p className="text-sm text-white truncate">{asset.name}</p>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-slate-500">
-                          {formatFileSize(asset.fileSize)}
-                        </span>
+                        <span className="text-xs text-slate-500">{formatFileSize(asset.fileSize)}</span>
                         <span className="text-xs text-slate-500">{sourceLabels[asset.source]}</span>
                       </div>
                       {asset.tags && asset.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {asset.tags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-1.5 py-0.5 bg-slate-700 text-slate-400 text-xs rounded"
-                            >
+                            <span key={tag} className="px-1.5 py-0.5 bg-slate-700 text-slate-400 text-xs rounded">
                               {tag}
                             </span>
                           ))}

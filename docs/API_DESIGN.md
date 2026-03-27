@@ -9,12 +9,12 @@
 
 ### 1.1 基础信息
 
-| 项目 | 值 |
-|-----|-----|
-| Base URL | `/api/v1` |
+| 项目     | 值                 |
+| -------- | ------------------ |
+| Base URL | `/api/v1`          |
 | 认证方式 | Bearer Token (JWT) |
-| 数据格式 | JSON |
-| 字符编码 | UTF-8 |
+| 数据格式 | JSON               |
+| 字符编码 | UTF-8              |
 
 ### 1.2 统一响应格式
 
@@ -51,21 +51,21 @@ interface PaginatedResponse<T> {
 
 ### 1.3 错误码定义
 
-| 错误码 | HTTP状态码 | 说明 |
-|-------|-----------|------|
-| AUTH_001 | 401 | 未登录 |
-| AUTH_002 | 401 | Token过期 |
-| AUTH_003 | 403 | 权限不足 |
-| USER_001 | 400 | 用户已存在 |
-| USER_002 | 404 | 用户不存在 |
-| QUOTA_001 | 403 | 额度不足 |
-| QUOTA_002 | 403 | 并发任务数已达上限 |
-| TASK_001 | 404 | 任务不存在 |
-| TASK_002 | 400 | 任务状态不允许此操作 |
-| ASSET_001 | 404 | 素材不存在 |
-| PROJECT_001 | 404 | 项目不存在 |
-| AI_001 | 500 | AI服务调用失败 |
-| AI_002 | 504 | AI服务超时 |
+| 错误码      | HTTP状态码 | 说明                 |
+| ----------- | ---------- | -------------------- |
+| AUTH_001    | 401        | 未登录               |
+| AUTH_002    | 401        | Token过期            |
+| AUTH_003    | 403        | 权限不足             |
+| USER_001    | 400        | 用户已存在           |
+| USER_002    | 404        | 用户不存在           |
+| QUOTA_001   | 403        | 额度不足             |
+| QUOTA_002   | 403        | 并发任务数已达上限   |
+| TASK_001    | 404        | 任务不存在           |
+| TASK_002    | 400        | 任务状态不允许此操作 |
+| ASSET_001   | 404        | 素材不存在           |
+| PROJECT_001 | 404        | 项目不存在           |
+| AI_001      | 500        | AI服务调用失败       |
+| AI_002      | 504        | AI服务超时           |
 
 ---
 
@@ -85,6 +85,7 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -163,6 +164,7 @@ Authorization: Bearer {token}
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -210,6 +212,7 @@ Authorization: Bearer {token}
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -293,6 +296,7 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -350,6 +354,7 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -439,18 +444,19 @@ Content-Type: application/json
 
 **参数说明**：
 
-| 参数 | 类型 | 必填 | 说明 |
-|-----|------|-----|------|
-| prompt | string | 是 | 音乐描述 |
-| style | string[] | 否 | 风格标签（pop, rock, jazz 等） |
-| mood | string | 否 | 情绪（happy, sad, romantic 等） |
-| duration | number | 否 | 目标时长（30-240秒） |
-| vocalGender | string | 否 | 人声性别：m（男）/ f（女） |
-| model | string | 否 | 模型：suno-v4 / suno-v4.5 / suno-v5 |
-| projectId | string | 否 | 关联项目ID |
-| saveToProject | boolean | 否 | 是否保存到项目 |
+| 参数          | 类型     | 必填 | 说明                                |
+| ------------- | -------- | ---- | ----------------------------------- |
+| prompt        | string   | 是   | 音乐描述                            |
+| style         | string[] | 否   | 风格标签（pop, rock, jazz 等）      |
+| mood          | string   | 否   | 情绪（happy, sad, romantic 等）     |
+| duration      | number   | 否   | 目标时长（30-240秒）                |
+| vocalGender   | string   | 否   | 人声性别：m（男）/ f（女）          |
+| model         | string   | 否   | 模型：suno-v4 / suno-v4.5 / suno-v5 |
+| projectId     | string   | 否   | 关联项目ID                          |
+| saveToProject | boolean  | 否   | 是否保存到项目                      |
 
 **响应**：
+
 ```json
 {
   "success": true,
@@ -484,15 +490,15 @@ Content-Type: application/json
 
 **参数说明**：
 
-| 参数 | 类型 | 必填 | 说明 |
-|-----|------|-----|------|
-| lyrics | string | 是 | 歌词（支持 [Verse]/[Chorus]/[Bridge] 标记） |
-| style | string[] | 是 | 风格标签 |
-| title | string | 是 | 歌曲名称（最多80字符） |
-| vocalGender | string | 否 | 人声性别：m（男）/ f（女） |
-| duration | number | 否 | 目标时长（30-240秒） |
-| model | string | 否 | 模型：suno-v4 / suno-v4.5 / suno-v5 |
-| projectId | string | 否 | 关联项目ID |
+| 参数        | 类型     | 必填 | 说明                                        |
+| ----------- | -------- | ---- | ------------------------------------------- |
+| lyrics      | string   | 是   | 歌词（支持 [Verse]/[Chorus]/[Bridge] 标记） |
+| style       | string[] | 是   | 风格标签                                    |
+| title       | string   | 是   | 歌曲名称（最多80字符）                      |
+| vocalGender | string   | 否   | 人声性别：m（男）/ f（女）                  |
+| duration    | number   | 否   | 目标时长（30-240秒）                        |
+| model       | string   | 否   | 模型：suno-v4 / suno-v4.5 / suno-v5         |
+| projectId   | string   | 否   | 关联项目ID                                  |
 
 ### 7.3 生成音乐（纯音乐）
 
@@ -521,6 +527,7 @@ Authorization: Bearer {token}
 ```
 
 **音乐任务响应**：
+
 ```json
 {
   "success": true,
@@ -557,6 +564,7 @@ Authorization: Bearer {token}
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -707,6 +715,7 @@ Authorization: Bearer {token}
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -784,6 +793,6 @@ Content-Type: application/json
 
 ---
 
-*文档版本: v1.0*
-*最后更新: 2026-03-06*
-6*
+_文档版本: v1.0_
+_最后更新: 2026-03-06_
+6\*

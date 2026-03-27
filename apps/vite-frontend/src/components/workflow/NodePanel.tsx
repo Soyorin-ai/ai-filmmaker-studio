@@ -75,9 +75,7 @@ export function NodePanel({onAddNode}: NodePanelProps) {
                 <Icon className="w-4 h-4" style={{color: template.color}} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm text-white group-hover:text-white">
-                  {template.label}
-                </div>
+                <div className="text-sm text-white group-hover:text-white">{template.label}</div>
                 <div className="text-xs text-white/40">{template.description}</div>
               </div>
             </button>
@@ -86,9 +84,7 @@ export function NodePanel({onAddNode}: NodePanelProps) {
       </div>
 
       <div className="mt-3 pt-3 border-t border-white/10">
-        <p className="text-xs text-white/40">
-          拖拽节点到画布，或点击添加
-        </p>
+        <p className="text-xs text-white/40">拖拽节点到画布，或点击添加</p>
       </div>
     </div>
   );

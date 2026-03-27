@@ -24,9 +24,7 @@ export function MergeNode(props: NodeProps<MergeNodeData>) {
       ]}
       outputs={[{id: 'output'}]}
     >
-      <div className="text-xs text-white/60">
-        {modeLabels[data.mode]}
-      </div>
+      <div className="text-xs text-white/60">{modeLabels[data.mode]}</div>
     </BaseNode>
   );
 }

@@ -97,7 +97,7 @@ export const projectsApi = {
     if (params.status) queryParams.set('status', params.status);
     if (params.search) queryParams.set('search', params.search);
 
-    const response = await apiClient.get<{ success: boolean; data: ProjectsListResult }>(
+    const response = await apiClient.get<{success: boolean; data: ProjectsListResult}>(
       `/projects?${queryParams.toString()}`,
     );
     return response.data.data;
@@ -107,9 +107,7 @@ export const projectsApi = {
    * 获取项目详情
    */
   getProject: async (id: string): Promise<Project> => {
-    const response = await apiClient.get<{ success: boolean; data: Project }>(
-      `/projects/${id}`,
-    );
+    const response = await apiClient.get<{success: boolean; data: Project}>(`/projects/${id}`);
     return response.data.data;
   },
 
@@ -117,10 +115,7 @@ export const projectsApi = {
    * 创建项目
    */
   createProject: async (params: CreateProjectParams): Promise<Project> => {
-    const response = await apiClient.post<{ success: boolean; data: Project }>(
-      '/projects',
-      params,
-    );
+    const response = await apiClient.post<{success: boolean; data: Project}>('/projects', params);
     return response.data.data;
   },
 
@@ -128,38 +123,23 @@ export const projectsApi = {
    * 更新项目
    */
   updateProject: async (id: string, params: UpdateProjectParams): Promise<Project> => {
-    const response = await apiClient.put<{ success: boolean; data: Project }>(
-      `/projects/${id}`,
-      params,
-    );
+    const response = await apiClient.put<{success: boolean; data: Project}>(`/projects/${id}`, params);
     return response.data.data;
   },
 
   /**
    * 更新项目工作流
    */
-  updateWorkflow: async (
-    id: string,
-    workflow: Record<string, unknown>,
-  ): Promise<Project> => {
-    const response = await apiClient.put<{ success: boolean; data: Project }>(
-      `/projects/${id}/workflow`,
-      { workflow },
-    );
+  updateWorkflow: async (id: string, workflow: Record<string, unknown>): Promise<Project> => {
+    const response = await apiClient.put<{success: boolean; data: Project}>(`/projects/${id}/workflow`, {workflow});
     return response.data.data;
   },
 
   /**
    * 更新项目时间线
    */
-  updateTimeline: async (
-    id: string,
-    timeline: Record<string, unknown>,
-  ): Promise<Project> => {
-    const response = await apiClient.put<{ success: boolean; data: Project }>(
-      `/projects/${id}/timeline`,
-      { timeline },
-    );
+  updateTimeline: async (id: string, timeline: Record<string, unknown>): Promise<Project> => {
+    const response = await apiClient.put<{success: boolean; data: Project}>(`/projects/${id}/timeline`, {timeline});
     return response.data.data;
   },
 
@@ -173,11 +153,10 @@ export const projectsApi = {
   /**
    * 批量删除项目
    */
-  deleteProjects: async (ids: string[]): Promise<{ count: number }> => {
-    const response = await apiClient.delete<{ success: boolean; data: { count: number } }>(
-      '/projects/batch',
-      { data: { ids } },
-    );
+  deleteProjects: async (ids: string[]): Promise<{count: number}> => {
+    const response = await apiClient.delete<{success: boolean; data: {count: number}}>('/projects/batch', {
+      data: {ids},
+    });
     return response.data.data;
   },
 
@@ -185,9 +164,7 @@ export const projectsApi = {
    * 归档项目
    */
   archiveProject: async (id: string): Promise<Project> => {
-    const response = await apiClient.post<{ success: boolean; data: Project }>(
-      `/projects/${id}/archive`,
-    );
+    const response = await apiClient.post<{success: boolean; data: Project}>(`/projects/${id}/archive`);
     return response.data.data;
   },
 
@@ -195,9 +172,7 @@ export const projectsApi = {
    * 恢复项目
    */
   restoreProject: async (id: string): Promise<Project> => {
-    const response = await apiClient.post<{ success: boolean; data: Project }>(
-      `/projects/${id}/restore`,
-    );
+    const response = await apiClient.post<{success: boolean; data: Project}>(`/projects/${id}/restore`);
     return response.data.data;
   },
 
@@ -205,7 +180,7 @@ export const projectsApi = {
    * 添加素材到项目
    */
   addAsset: async (projectId: string, assetId: string): Promise<Project> => {
-    const response = await apiClient.post<{ success: boolean; data: Project }>(
+    const response = await apiClient.post<{success: boolean; data: Project}>(
       `/projects/${projectId}/assets/${assetId}`,
     );
     return response.data.data;
@@ -215,7 +190,7 @@ export const projectsApi = {
    * 从项目移除素材
    */
   removeAsset: async (projectId: string, assetId: string): Promise<Project> => {
-    const response = await apiClient.delete<{ success: boolean; data: Project }>(
+    const response = await apiClient.delete<{success: boolean; data: Project}>(
       `/projects/${projectId}/assets/${assetId}`,
     );
     return response.data.data;
@@ -225,9 +200,7 @@ export const projectsApi = {
    * 获取项目统计
    */
   getStats: async (): Promise<ProjectStats> => {
-    const response = await apiClient.get<{ success: boolean; data: ProjectStats }>(
-      '/projects/stats',
-    );
+    const response = await apiClient.get<{success: boolean; data: ProjectStats}>('/projects/stats');
     return response.data.data;
   },
 };

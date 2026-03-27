@@ -1,8 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsIn,
-} from 'class-validator';
+import {IsString, IsOptional, IsIn} from 'class-validator';
 
 export class CreateImageTaskDto {
   @IsString()
@@ -17,23 +13,7 @@ export class CreateImageTaskDto {
   imageSize?: string;
 
   @IsOptional()
-  @IsIn([
-    '1:1',
-    '16:9',
-    '9:16',
-    '4:3',
-    '3:4',
-    '3:2',
-    '2:3',
-    '1:2',
-    '2:1',
-    '1:3',
-    '3:1',
-    '1:4',
-    '4:1',
-    '1:8',
-    '8:1',
-  ])
+  @IsIn(['1:1', '16:9', '9:16', '4:3', '3:4', '3:2', '2:3', '1:2', '2:1', '1:3', '3:1', '1:4', '4:1', '1:8', '8:1'])
   aspectRatio?: string;
 
   @IsOptional()

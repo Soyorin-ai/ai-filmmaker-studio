@@ -1,13 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsIn,
-  IsNumber,
-  Min,
-  Max,
-  IsBoolean,
-  IsUrl,
-} from 'class-validator';
+import {IsString, IsOptional, IsIn, IsNumber, Min, Max, IsBoolean, IsUrl} from 'class-validator';
 
 export class CreateVideoTaskDto {
   @IsString()

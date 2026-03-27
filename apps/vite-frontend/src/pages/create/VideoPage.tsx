@@ -1,16 +1,16 @@
-import { useState, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { Upload, Download, Sparkles, Video, X, ArrowLeft, Play, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
+import {useState, useRef} from 'react';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {z} from 'zod';
+import {useMutation} from '@tanstack/react-query';
+import {toast} from 'sonner';
+import {Upload, Download, Sparkles, Video, X, ArrowLeft, Play, Loader2} from 'lucide-react';
+import {Link} from 'react-router-dom';
+import {Button} from '@/components/ui/button';
+import {Label} from '@/components/ui/label';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {Textarea} from '@/components/ui/textarea';
 
 // 表单验证 Schema
 const videoGenSchema = z.object({
@@ -25,19 +25,19 @@ type VideoGenFormData = z.infer<typeof videoGenSchema>;
 
 // 分辨率选项
 const RESOLUTIONS = [
-  { value: '480p', label: '480p (SD) - 快速预览' },
-  { value: '720p', label: '720p (HD) - 标准' },
-  { value: '1080p', label: '1080p (Full HD) - 高清' },
+  {value: '480p', label: '480p (SD) - 快速预览'},
+  {value: '720p', label: '720p (HD) - 标准'},
+  {value: '1080p', label: '1080p (Full HD) - 高清'},
 ];
 
 // 时长选项
 const DURATIONS = [
-  { value: 4, label: '4 秒' },
-  { value: 5, label: '5 秒' },
-  { value: 6, label: '6 秒' },
-  { value: 8, label: '8 秒' },
-  { value: 10, label: '10 秒' },
-  { value: 12, label: '12 秒' },
+  {value: 4, label: '4 秒'},
+  {value: 5, label: '5 秒'},
+  {value: 6, label: '6 秒'},
+  {value: 8, label: '8 秒'},
+  {value: 10, label: '10 秒'},
+  {value: 12, label: '12 秒'},
 ];
 
 // 任务状态
@@ -63,7 +63,7 @@ export function VideoPage() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: {errors},
   } = useForm<VideoGenFormData>({
     resolver: zodResolver(videoGenSchema) as any,
     defaultValues: {
@@ -74,10 +74,7 @@ export function VideoPage() {
     },
   });
 
-  const handleImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: (img: string | null) => void
-  ) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (img: string | null) => void) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -99,7 +96,7 @@ export function VideoPage() {
       };
       const response = await fetch('/api/v1/ai/video/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload),
       });
       return response.json();
@@ -157,23 +154,26 @@ export function VideoPage() {
     <div
       className="min-h-screen relative"
       style={{
-        background: 'linear-gradient(180deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)'
+        background: 'linear-gradient(180deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%)',
       }}
     >
       {/* Header */}
       <header
         className="border-b border-white/10 sticky top-0 z-10 backdrop-blur-sm"
-        style={{ background: 'rgba(15, 23, 42, 0.8)' }}
+        style={{background: 'rgba(15, 23, 42, 0.8)'}}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer"
+            >
               <ArrowLeft className="w-5 h-5" />
               <span>返回</span>
             </Link>
             <div className="w-px h-6 bg-white/20" />
             <h1 className="text-xl font-semibold flex items-center gap-2 text-white">
-              <Video className="w-6 h-6" style={{ color: '#A78BFA' }} />
+              <Video className="w-6 h-6" style={{color: '#A78BFA'}} />
               AI 生视频工作台
             </h1>
           </div>
@@ -187,14 +187,29 @@ export function VideoPage() {
             <div
               className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
               style={{
-                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))',
               }}
             >
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
                 <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10 rounded-xl p-1">
-                  <TabsTrigger value="text2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">文生视频</TabsTrigger>
-                  <TabsTrigger value="image2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">图生视频</TabsTrigger>
-                  <TabsTrigger value="frame2video" className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg">首尾帧生视频</TabsTrigger>
+                  <TabsTrigger
+                    value="text2video"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg"
+                  >
+                    文生视频
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="image2video"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg"
+                  >
+                    图生视频
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="frame2video"
+                    className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60 rounded-lg"
+                  >
+                    首尾帧生视频
+                  </TabsTrigger>
                 </TabsList>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-6">
@@ -208,9 +223,7 @@ export function VideoPage() {
                         rows={4}
                         className="mt-2 bg-white/5 border-white/10 text-white placeholder-white/30 focus:border-purple-400/50"
                       />
-                      {errors.prompt && (
-                        <p className="text-sm text-red-400 mt-1">{errors.prompt.message}</p>
-                      )}
+                      {errors.prompt && <p className="text-sm text-red-400 mt-1">{errors.prompt.message}</p>}
                     </div>
                   </TabsContent>
 
@@ -351,10 +364,7 @@ export function VideoPage() {
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                     <div>
                       <Label className="text-white/70">分辨率</Label>
-                      <Select
-                        value={watch('resolution')}
-                        onValueChange={(v) => setValue('resolution', v as any)}
-                      >
+                      <Select value={watch('resolution')} onValueChange={(v) => setValue('resolution', v as any)}>
                         <SelectTrigger className="mt-2 bg-white/5 border-white/10 text-white">
                           <SelectValue />
                         </SelectTrigger>
@@ -405,7 +415,7 @@ export function VideoPage() {
                     className="w-full h-12 text-lg cursor-pointer"
                     style={{
                       background: 'linear-gradient(135deg, #F97316, #EA580C)',
-                      boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4)'
+                      boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4)',
                     }}
                     disabled={generateVideoMutation.isPending}
                   >
@@ -431,7 +441,7 @@ export function VideoPage() {
             <div
               className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
               style={{
-                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))',
               }}
             >
               <h2 className="text-lg font-semibold mb-4 text-white">生成结果</h2>
@@ -457,7 +467,7 @@ export function VideoPage() {
                         className="w-full cursor-pointer"
                         style={{
                           background: 'linear-gradient(135deg, #F97316, #EA580C)',
-                          boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)'
+                          boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
                         }}
                       >
                         <Download className="w-4 h-4 mr-2" />
@@ -467,9 +477,7 @@ export function VideoPage() {
                   )}
 
                   {generatedVideo.status === 'failed' && (
-                    <div className="text-red-400">
-                      生成失败: {generatedVideo.error || '未知错误'}
-                    </div>
+                    <div className="text-red-400">生成失败: {generatedVideo.error || '未知错误'}</div>
                   )}
                 </div>
               ) : (
@@ -484,14 +492,20 @@ export function VideoPage() {
             <div
               className="rounded-2xl p-6 border border-white/10 backdrop-blur-sm"
               style={{
-                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))'
+                background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.4), rgba(15, 23, 42, 0.4))',
               }}
             >
               <h3 className="font-semibold mb-3 text-white">使用提示</h3>
               <ul className="space-y-2 text-sm text-white/50">
-                <li>• <strong>文生视频</strong>：用文字描述生成视频</li>
-                <li>• <strong>图生视频</strong>：上传图片，让AI生成动态效果</li>
-                <li>• <strong>首尾帧生视频</strong>：上传开始和结束图片，AI生成过渡</li>
+                <li>
+                  • <strong>文生视频</strong>：用文字描述生成视频
+                </li>
+                <li>
+                  • <strong>图生视频</strong>：上传图片，让AI生成动态效果
+                </li>
+                <li>
+                  • <strong>首尾帧生视频</strong>：上传开始和结束图片，AI生成过渡
+                </li>
                 <li>• 生成时间约 30-60 秒，请耐心等待</li>
               </ul>
             </div>

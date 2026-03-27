@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '@next-nest-turbo-auth-boilerplate/db';
-import { Project, ProjectStatus } from '@prisma/client';
-import { CreateProjectDto, UpdateProjectDto, QueryProjectDto } from './dto';
-import { Prisma } from '@prisma/client';
+import {Injectable, NotFoundException, ForbiddenException} from '@nestjs/common';
+import {PrismaService} from '@next-nest-turbo-auth-boilerplate/db';
+import {Project, ProjectStatus} from '@prisma/client';
+import {CreateProjectDto, UpdateProjectDto, QueryProjectDto} from './dto';
+import {Prisma} from '@prisma/client';
 
 @Injectable()
 export class ProjectsService {
@@ -30,7 +30,7 @@ export class ProjectsService {
    * 查询项目列表
    */
   async findAll(userId: string, query: QueryProjectDto) {
-    const { page = 1, limit = 20, status, search } = query;
+    const {page = 1, limit = 20, status, search} = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProjectWhereInput = {
@@ -44,8 +44,8 @@ export class ProjectsService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
+        {name: {contains: search, mode: 'insensitive'}},
+        {description: {contains: search, mode: 'insensitive'}},
       ];
     }
 
@@ -54,14 +54,14 @@ export class ProjectsService {
         where,
         skip,
         take: limit,
-        orderBy: { updatedAt: 'desc' as const },
+        orderBy: {updatedAt: 'desc' as const},
         include: {
           _count: {
-            select: { assets: true, tasks: true },
+            select: {assets: true, tasks: true},
           },
         },
       }),
-      this.prisma.project.count({ where }),
+      this.prisma.project.count({where}),
     ]);
 
     return {
@@ -84,16 +84,16 @@ export class ProjectsService {
       },
       include: {
         assets: {
-          where: { deletedAt: null },
-          orderBy: { createdAt: 'desc' as const },
+          where: {deletedAt: null},
+          orderBy: {createdAt: 'desc' as const},
           take: 20,
         },
         tasks: {
-          orderBy: { createdAt: 'desc' as const },
+          orderBy: {createdAt: 'desc' as const},
           take: 10,
         },
         _count: {
-          select: { assets: true, tasks: true },
+          select: {assets: true, tasks: true},
         },
       },
     });
@@ -126,7 +126,7 @@ export class ProjectsService {
 
     if (dto.workflow) {
       updateData.workflow = dto.workflow as Prisma.InputJsonValue;
-      updateData.workflowVersion = { increment: 1 };
+      updateData.workflowVersion = {increment: 1};
     }
 
     if (dto.timeline) {
@@ -135,7 +135,7 @@ export class ProjectsService {
     }
 
     return this.prisma.project.update({
-      where: { id },
+      where: {id},
       data: updateData,
     });
   }
@@ -143,18 +143,14 @@ export class ProjectsService {
   /**
    * 更新项目工作流
    */
-  async updateWorkflow(
-    userId: string,
-    id: string,
-    workflow: Record<string, any>,
-  ): Promise<Project> {
+  async updateWorkflow(userId: string, id: string, workflow: Record<string, any>): Promise<Project> {
     await this.findOne(userId, id);
 
     return this.prisma.project.update({
-      where: { id },
+      where: {id},
       data: {
         workflow: workflow as Prisma.InputJsonValue,
-        workflowVersion: { increment: 1 },
+        workflowVersion: {increment: 1},
       },
     });
   }
@@ -162,15 +158,11 @@ export class ProjectsService {
   /**
    * 更新项目时间线
    */
-  async updateTimeline(
-    userId: string,
-    id: string,
-    timeline: Record<string, any>,
-  ): Promise<Project> {
+  async updateTimeline(userId: string, id: string, timeline: Record<string, any>): Promise<Project> {
     await this.findOne(userId, id);
 
     return this.prisma.project.update({
-      where: { id },
+      where: {id},
       data: {
         timeline: timeline as Prisma.InputJsonValue,
         duration: this.calculateDuration(timeline),
@@ -181,31 +173,31 @@ export class ProjectsService {
   /**
    * 软删除项目
    */
-  async remove(userId: string, id: string): Promise<{ success: boolean }> {
+  async remove(userId: string, id: string): Promise<{success: boolean}> {
     await this.findOne(userId, id);
 
     await this.prisma.project.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+      where: {id},
+      data: {deletedAt: new Date()},
     });
 
-    return { success: true };
+    return {success: true};
   }
 
   /**
    * 批量删除项目
    */
-  async removeMany(userId: string, ids: string[]): Promise<{ success: boolean; count: number }> {
+  async removeMany(userId: string, ids: string[]): Promise<{success: boolean; count: number}> {
     const result = await this.prisma.project.updateMany({
       where: {
-        id: { in: ids },
+        id: {in: ids},
         userId,
         deletedAt: null,
       },
-      data: { deletedAt: new Date() },
+      data: {deletedAt: new Date()},
     });
 
-    return { success: true, count: result.count };
+    return {success: true, count: result.count};
   }
 
   /**
@@ -215,8 +207,8 @@ export class ProjectsService {
     await this.findOne(userId, id);
 
     return this.prisma.project.update({
-      where: { id },
-      data: { status: ProjectStatus.ARCHIVED },
+      where: {id},
+      data: {status: ProjectStatus.ARCHIVED},
     });
   }
 
@@ -227,8 +219,8 @@ export class ProjectsService {
     await this.findOne(userId, id);
 
     return this.prisma.project.update({
-      where: { id },
-      data: { status: ProjectStatus.DRAFT },
+      where: {id},
+      data: {status: ProjectStatus.DRAFT},
     });
   }
 
@@ -239,18 +231,18 @@ export class ProjectsService {
     const [totalCount, statusStats, recentProjects] = await Promise.all([
       // 总项目数
       this.prisma.project.count({
-        where: { userId, deletedAt: null },
+        where: {userId, deletedAt: null},
       }),
       // 按状态统计
       this.prisma.project.groupBy({
         by: ['status'],
-        where: { userId, deletedAt: null },
-        _count: { id: true },
+        where: {userId, deletedAt: null},
+        _count: {id: true},
       }),
       // 最近项目
       this.prisma.project.findMany({
-        where: { userId, deletedAt: null },
-        orderBy: { updatedAt: 'desc' as const },
+        where: {userId, deletedAt: null},
+        orderBy: {updatedAt: 'desc' as const},
         take: 5,
         select: {
           id: true,
@@ -283,14 +275,14 @@ export class ProjectsService {
 
     // 更新素材的 projectId
     await this.prisma.asset.update({
-      where: { id: assetId },
-      data: { projectId },
+      where: {id: assetId},
+      data: {projectId},
     });
 
     // 更新项目的素材计数
     return this.prisma.project.update({
-      where: { id: projectId },
-      data: { assetCount: { increment: 1 } },
+      where: {id: projectId},
+      data: {assetCount: {increment: 1}},
     });
   }
 
@@ -301,13 +293,13 @@ export class ProjectsService {
     await this.findOne(userId, projectId);
 
     await this.prisma.asset.update({
-      where: { id: assetId },
-      data: { projectId: null },
+      where: {id: assetId},
+      data: {projectId: null},
     });
 
     return this.prisma.project.update({
-      where: { id: projectId },
-      data: { assetCount: { decrement: 1 } },
+      where: {id: projectId},
+      data: {assetCount: {decrement: 1}},
     });
   }
 

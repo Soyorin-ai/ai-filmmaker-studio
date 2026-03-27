@@ -14,25 +14,26 @@
 
 **设计理念**: 为专业影视创作者打造的深色主题界面，减少眼部疲劳，突出视觉内容，营造专业电影制作氛围。
 
-**关键词**: 
+**关键词**:
+
 - 深色主题、高对比度、深黑、午夜蓝
 - 护眼、OLED 优化、夜间模式
 - 专业、创意工具、电影感
 
 ### 1.2 配色方案
 
-| 角色 | 色值 | CSS 变量 | 用途 |
-|-----|------|---------|------|
-| **Primary** | `#0F0F23` | `--color-primary` | 主色调、品牌色 |
-| **Secondary** | `#1E1B4B` | `--color-secondary` | 次要元素、卡片背景 |
-| **CTA/Accent** | `#E11D48` | `--color-cta` | 行动按钮、强调元素 |
-| **Background** | `#000000` | `--color-background` | 页面背景 |
-| **Text Primary** | `#F8FAFC` | `--color-text` | 主要文字 |
-| **Text Secondary** | `#94A3B8` | `--color-text-secondary` | 次要文字 |
-| **Border** | `#1E293B` | `--color-border` | 边框、分割线 |
-| **Success** | `#22C55E` | `--color-success` | 成功状态 |
-| **Warning** | `#F59E0B` | `--color-warning` | 警告状态 |
-| **Error** | `#EF4444` | `--color-error` | 错误状态 |
+| 角色               | 色值      | CSS 变量                 | 用途               |
+| ------------------ | --------- | ------------------------ | ------------------ |
+| **Primary**        | `#0F0F23` | `--color-primary`        | 主色调、品牌色     |
+| **Secondary**      | `#1E1B4B` | `--color-secondary`      | 次要元素、卡片背景 |
+| **CTA/Accent**     | `#E11D48` | `--color-cta`            | 行动按钮、强调元素 |
+| **Background**     | `#000000` | `--color-background`     | 页面背景           |
+| **Text Primary**   | `#F8FAFC` | `--color-text`           | 主要文字           |
+| **Text Secondary** | `#94A3B8` | `--color-text-secondary` | 次要文字           |
+| **Border**         | `#1E293B` | `--color-border`         | 边框、分割线       |
+| **Success**        | `#22C55E` | `--color-success`        | 成功状态           |
+| **Warning**        | `#F59E0B` | `--color-warning`        | 警告状态           |
+| **Error**          | `#EF4444` | `--color-error`          | 错误状态           |
 
 **配色说明**: 影院级深黑 + 播放红，突出内容的专业电影制作氛围
 
@@ -46,48 +47,48 @@
 
 **字阶系统**:
 
-| 级别 | 大小 | 行高 | 字重 | 用途 |
-|-----|------|------|------|------|
-| Display | 48px | 1.1 | 700 | 首屏标题 |
-| H1 | 36px | 1.2 | 700 | 页面标题 |
-| H2 | 28px | 1.3 | 600 | 区块标题 |
-| H3 | 22px | 1.4 | 600 | 卡片标题 |
-| H4 | 18px | 1.4 | 600 | 小标题 |
-| Body | 16px | 1.5 | 400 | 正文 |
-| Small | 14px | 1.5 | 400 | 辅助文字 |
-| Caption | 12px | 1.4 | 400 | 说明文字 |
+| 级别    | 大小 | 行高 | 字重 | 用途     |
+| ------- | ---- | ---- | ---- | -------- |
+| Display | 48px | 1.1  | 700  | 首屏标题 |
+| H1      | 36px | 1.2  | 700  | 页面标题 |
+| H2      | 28px | 1.3  | 600  | 区块标题 |
+| H3      | 22px | 1.4  | 600  | 卡片标题 |
+| H4      | 18px | 1.4  | 600  | 小标题   |
+| Body    | 16px | 1.5  | 400  | 正文     |
+| Small   | 14px | 1.5  | 400  | 辅助文字 |
+| Caption | 12px | 1.4  | 400  | 说明文字 |
 
 ### 1.4 间距系统
 
-| Token | 值 | 用途 |
-|-------|-----|------|
-| `--space-xs` | 4px | 紧凑间距 |
-| `--space-sm` | 8px | 图标间距、行内间距 |
-| `--space-md` | 16px | 标准内边距 |
-| `--space-lg` | 24px | 区块内边距 |
-| `--space-xl` | 32px | 大间距 |
-| `--space-2xl` | 48px | 区块间距 |
-| `--space-3xl` | 64px | 首屏内边距 |
+| Token         | 值   | 用途               |
+| ------------- | ---- | ------------------ |
+| `--space-xs`  | 4px  | 紧凑间距           |
+| `--space-sm`  | 8px  | 图标间距、行内间距 |
+| `--space-md`  | 16px | 标准内边距         |
+| `--space-lg`  | 24px | 区块内边距         |
+| `--space-xl`  | 32px | 大间距             |
+| `--space-2xl` | 48px | 区块间距           |
+| `--space-3xl` | 64px | 首屏内边距         |
 
 ### 1.5 阴影系统
 
-| 级别 | 值 | 用途 |
-|-----|------|------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.3)` | 轻微浮起 |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.4)` | 卡片、按钮 |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.5)` | 弹窗、下拉菜单 |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.6)` | 首屏图片、特色卡片 |
-| `--shadow-glow` | `0 0 20px rgba(225, 29, 72, 0.3)` | CTA 按钮发光效果 |
+| 级别            | 值                                | 用途               |
+| --------------- | --------------------------------- | ------------------ |
+| `--shadow-sm`   | `0 1px 2px rgba(0,0,0,0.3)`       | 轻微浮起           |
+| `--shadow-md`   | `0 4px 6px rgba(0,0,0,0.4)`       | 卡片、按钮         |
+| `--shadow-lg`   | `0 10px 15px rgba(0,0,0,0.5)`     | 弹窗、下拉菜单     |
+| `--shadow-xl`   | `0 20px 25px rgba(0,0,0,0.6)`     | 首屏图片、特色卡片 |
+| `--shadow-glow` | `0 0 20px rgba(225, 29, 72, 0.3)` | CTA 按钮发光效果   |
 
 ### 1.6 圆角系统
 
-| Token | 值 | 用途 |
-|-------|-----|------|
-| `--radius-sm` | 4px | 小元素（标签、徽章） |
-| `--radius-md` | 8px | 按钮、输入框 |
-| `--radius-lg` | 12px | 卡片 |
-| `--radius-xl` | 16px | 大卡片、弹窗 |
-| `--radius-full` | 9999px | 圆形元素 |
+| Token           | 值     | 用途                 |
+| --------------- | ------ | -------------------- |
+| `--radius-sm`   | 4px    | 小元素（标签、徽章） |
+| `--radius-md`   | 8px    | 按钮、输入框         |
+| `--radius-lg`   | 12px   | 卡片                 |
+| `--radius-xl`   | 16px   | 大卡片、弹窗         |
+| `--radius-full` | 9999px | 圆形元素             |
 
 ---
 
@@ -99,14 +100,12 @@
 
 ```tsx
 // 用于主要操作：生成、保存、导出等
-<button className="btn-primary">
-  生成视频
-</button>
+<button className="btn-primary">生成视频</button>
 ```
 
 ```css
 .btn-primary {
-  background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -138,16 +137,14 @@
 
 ```tsx
 // 用于次要操作：取消、预览等
-<button className="btn-secondary">
-  预览
-</button>
+<button className="btn-secondary">预览</button>
 ```
 
 ```css
 .btn-secondary {
   background: transparent;
-  color: #F8FAFC;
-  border: 1px solid #1E293B;
+  color: #f8fafc;
+  border: 1px solid #1e293b;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 500;
@@ -157,7 +154,7 @@
 }
 
 .btn-secondary:hover {
-  background: #1E293B;
+  background: #1e293b;
   border-color: #334155;
 }
 ```
@@ -174,7 +171,7 @@
 ```css
 .btn-icon {
   background: transparent;
-  color: #94A3B8;
+  color: #94a3b8;
   border: none;
   padding: 8px;
   border-radius: 8px;
@@ -186,8 +183,8 @@
 }
 
 .btn-icon:hover {
-  background: #1E293B;
-  color: #F8FAFC;
+  background: #1e293b;
+  color: #f8fafc;
 }
 ```
 
@@ -200,16 +197,14 @@
   <div className="card-header">
     <h3>场景 1</h3>
   </div>
-  <div className="card-body">
-    {/* 内容 */}
-  </div>
+  <div className="card-body">{/* 内容 */}</div>
 </div>
 ```
 
 ```css
 .card {
-  background: #0F0F23;
-  border: 1px solid #1E293B;
+  background: #0f0f23;
+  border: 1px solid #1e293b;
   border-radius: 12px;
   overflow: hidden;
   transition: all 200ms ease;
@@ -222,7 +217,7 @@
 
 .card-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #1E293B;
+  border-bottom: 1px solid #1e293b;
 }
 
 .card-body {
@@ -237,7 +232,9 @@
   <div className="asset-thumbnail">
     <img src="..." alt="场景预览" />
     <div className="asset-overlay">
-      <button className="btn-icon"><PlayIcon /></button>
+      <button className="btn-icon">
+        <PlayIcon />
+      </button>
     </div>
   </div>
   <div className="asset-info">
@@ -249,8 +246,8 @@
 
 ```css
 .asset-card {
-  background: #0F0F23;
-  border: 1px solid #1E293B;
+  background: #0f0f23;
+  border: 1px solid #1e293b;
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -258,7 +255,7 @@
 }
 
 .asset-card:hover {
-  border-color: #E11D48;
+  border-color: #e11d48;
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
@@ -298,13 +295,13 @@
 }
 
 .asset-name {
-  color: #F8FAFC;
+  color: #f8fafc;
   font-size: 14px;
   font-weight: 500;
 }
 
 .asset-meta {
-  color: #64748B;
+  color: #64748b;
   font-size: 12px;
 }
 ```
@@ -328,24 +325,24 @@
 }
 
 .input-label {
-  color: #94A3B8;
+  color: #94a3b8;
   font-size: 14px;
   font-weight: 500;
 }
 
 .input {
-  background: #0F0F23;
-  border: 1px solid #1E293B;
+  background: #0f0f23;
+  border: 1px solid #1e293b;
   border-radius: 8px;
   padding: 12px 16px;
-  color: #F8FAFC;
+  color: #f8fafc;
   font-size: 16px;
   transition: all 200ms ease;
 }
 
 .input:focus {
   outline: none;
-  border-color: #E11D48;
+  border-color: #e11d48;
   box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2);
 }
 
@@ -379,11 +376,11 @@
 
 .select {
   appearance: none;
-  background: #0F0F23;
-  border: 1px solid #1E293B;
+  background: #0f0f23;
+  border: 1px solid #1e293b;
   border-radius: 8px;
   padding: 12px 40px 12px 16px;
-  color: #F8FAFC;
+  color: #f8fafc;
   font-size: 16px;
   cursor: pointer;
   width: 100%;
@@ -391,7 +388,7 @@
 
 .select:focus {
   outline: none;
-  border-color: #E11D48;
+  border-color: #e11d48;
 }
 
 .select-icon {
@@ -399,7 +396,7 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #64748B;
+  color: #64748b;
   pointer-events: none;
 }
 ```
@@ -416,20 +413,20 @@
 ```css
 .progress-bar {
   height: 8px;
-  background: #1E293B;
+  background: #1e293b;
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #E11D48, #F43F5E);
+  background: linear-gradient(90deg, #e11d48, #f43f5e);
   border-radius: 4px;
   transition: width 300ms ease;
 }
 
 .progress-text {
-  color: #94A3B8;
+  color: #94a3b8;
   font-size: 14px;
 }
 ```
@@ -447,7 +444,7 @@
 ```css
 .tabs {
   display: flex;
-  border-bottom: 1px solid #1E293B;
+  border-bottom: 1px solid #1e293b;
   gap: 0;
 }
 
@@ -455,7 +452,7 @@
   background: transparent;
   border: none;
   padding: 12px 20px;
-  color: #64748B;
+  color: #64748b;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -464,11 +461,11 @@
 }
 
 .tab:hover {
-  color: #F8FAFC;
+  color: #f8fafc;
 }
 
 .tab.active {
-  color: #F8FAFC;
+  color: #f8fafc;
 }
 
 .tab.active::after {
@@ -478,7 +475,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: #E11D48;
+  background: #e11d48;
 }
 ```
 
@@ -494,7 +491,8 @@
 
 **CTA 位置**: 视频覆盖层（中心/底部）+ 底部区块
 
-**区块顺序**: 
+**区块顺序**:
+
 1. 视频背景首屏
 2. 关键功能覆盖层
 3. 优势区块
@@ -724,12 +722,12 @@
 
 ### 4.1 断点
 
-| 断点 | 宽度 | 用途 |
-|-----|------|------|
-| Mobile | < 768px | 移动设备 |
-| Tablet | 768px - 1024px | 平板 |
-| Desktop | 1024px - 1440px | 桌面 |
-| Large | > 1440px | 大屏 |
+| 断点    | 宽度            | 用途     |
+| ------- | --------------- | -------- |
+| Mobile  | < 768px         | 移动设备 |
+| Tablet  | 768px - 1024px  | 平板     |
+| Desktop | 1024px - 1440px | 桌面     |
+| Large   | > 1440px        | 大屏     |
 
 ### 4.2 响应式布局
 
@@ -770,11 +768,11 @@
 
 ### 5.1 过渡时间
 
-| 类型 | 时长 | 用途 |
-|-----|------|------|
-| Fast | 150ms | 按钮悬停、焦点状态 |
-| Normal | 200-300ms | 卡片悬停、模态框 |
-| Slow | 400-500ms | 页面过渡、大型动画 |
+| 类型   | 时长      | 用途               |
+| ------ | --------- | ------------------ |
+| Fast   | 150ms     | 按钮悬停、焦点状态 |
+| Normal | 200-300ms | 卡片悬停、模态框   |
+| Slow   | 400-500ms | 页面过渡、大型动画 |
 
 ### 5.2 缓动函数
 
@@ -806,29 +804,17 @@
 使用 **Lucide Icons** 或 **Heroicons**
 
 ```tsx
-import { 
-  Play, 
-  Pause, 
-  Plus, 
-  Trash2, 
-  Download, 
-  Upload,
-  Settings,
-  ChevronDown,
-  X,
-  Check,
-  Loader2
-} from 'lucide-react';
+import {Play, Pause, Plus, Trash2, Download, Upload, Settings, ChevronDown, X, Check, Loader2} from 'lucide-react';
 ```
 
 ### 6.2 图标大小
 
-| 大小 | 像素 | 用途 |
-|-----|------|------|
-| sm | 16px | 行内图标 |
-| md | 20px | 按钮图标 |
-| lg | 24px | 导航图标 |
-| xl | 32px | 功能图标 |
+| 大小 | 像素 | 用途     |
+| ---- | ---- | -------- |
+| sm   | 16px | 行内图标 |
+| md   | 20px | 按钮图标 |
+| lg   | 24px | 导航图标 |
+| xl   | 32px | 功能图标 |
 
 ---
 
@@ -844,7 +830,7 @@ import {
 
 ```css
 :focus-visible {
-  outline: 2px solid #E11D48;
+  outline: 2px solid #e11d48;
   outline-offset: 2px;
 }
 ```
@@ -885,6 +871,6 @@ import {
 
 ---
 
-*文档版本: v1.0*
-*最后更新: 2026-03-06*
-*设计系统: design-system/ai-filmmaker-studio/MASTER.md*
+_文档版本: v1.0_
+_最后更新: 2026-03-06_
+_设计系统: design-system/ai-filmmaker-studio/MASTER.md_

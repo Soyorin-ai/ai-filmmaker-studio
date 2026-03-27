@@ -1,13 +1,5 @@
 import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsEnum,
-  IsInt,
-  Min,
-  Max,
-  MaxLength,
-} from 'class-validator';
+import {IsString, IsOptional, IsEnum, IsInt, Min, Max, MaxLength} from 'class-validator';
 
 /**
  * 音乐生成模式

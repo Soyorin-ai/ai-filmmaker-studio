@@ -92,7 +92,7 @@ export const assetsApi = {
     if (params.tag) queryParams.set('tag', params.tag);
     if (params.isFavorite !== undefined) queryParams.set('isFavorite', String(params.isFavorite));
 
-    const response = await apiClient.get<{ success: boolean; data: AssetsListResult }>(
+    const response = await apiClient.get<{success: boolean; data: AssetsListResult}>(
       `/assets?${queryParams.toString()}`,
     );
     return response.data.data;
@@ -102,7 +102,7 @@ export const assetsApi = {
    * 获取素材详情
    */
   getAsset: async (id: string): Promise<Asset> => {
-    const response = await apiClient.get<{ success: boolean; data: Asset }>(`/assets/${id}`);
+    const response = await apiClient.get<{success: boolean; data: Asset}>(`/assets/${id}`);
     return response.data.data;
   },
 
@@ -110,7 +110,7 @@ export const assetsApi = {
    * 创建素材
    */
   createAsset: async (params: CreateAssetParams): Promise<Asset> => {
-    const response = await apiClient.post<{ success: boolean; data: Asset }>('/assets', params);
+    const response = await apiClient.post<{success: boolean; data: Asset}>('/assets', params);
     return response.data.data;
   },
 
@@ -118,7 +118,7 @@ export const assetsApi = {
    * 更新素材
    */
   updateAsset: async (id: string, params: UpdateAssetParams): Promise<Asset> => {
-    const response = await apiClient.put<{ success: boolean; data: Asset }>(`/assets/${id}`, params);
+    const response = await apiClient.put<{success: boolean; data: Asset}>(`/assets/${id}`, params);
     return response.data.data;
   },
 
@@ -132,11 +132,8 @@ export const assetsApi = {
   /**
    * 批量删除素材
    */
-  deleteAssets: async (ids: string[]): Promise<{ count: number }> => {
-    const response = await apiClient.delete<{ success: boolean; data: { count: number } }>(
-      '/assets/batch',
-      { data: { ids } },
-    );
+  deleteAssets: async (ids: string[]): Promise<{count: number}> => {
+    const response = await apiClient.delete<{success: boolean; data: {count: number}}>('/assets/batch', {data: {ids}});
     return response.data.data;
   },
 
@@ -144,9 +141,7 @@ export const assetsApi = {
    * 切换收藏状态
    */
   toggleFavorite: async (id: string): Promise<Asset> => {
-    const response = await apiClient.post<{ success: boolean; data: Asset }>(
-      `/assets/${id}/favorite`,
-    );
+    const response = await apiClient.post<{success: boolean; data: Asset}>(`/assets/${id}/favorite`);
     return response.data.data;
   },
 
@@ -154,10 +149,7 @@ export const assetsApi = {
    * 添加标签
    */
   addTag: async (id: string, tag: string): Promise<Asset> => {
-    const response = await apiClient.post<{ success: boolean; data: Asset }>(
-      `/assets/${id}/tags`,
-      { tag },
-    );
+    const response = await apiClient.post<{success: boolean; data: Asset}>(`/assets/${id}/tags`, {tag});
     return response.data.data;
   },
 
@@ -165,7 +157,7 @@ export const assetsApi = {
    * 移除标签
    */
   removeTag: async (id: string, tag: string): Promise<Asset> => {
-    const response = await apiClient.delete<{ success: boolean; data: Asset }>(
+    const response = await apiClient.delete<{success: boolean; data: Asset}>(
       `/assets/${id}/tags/${encodeURIComponent(tag)}`,
     );
     return response.data.data;
@@ -175,7 +167,7 @@ export const assetsApi = {
    * 获取用户所有标签
    */
   getUserTags: async (): Promise<string[]> => {
-    const response = await apiClient.get<{ success: boolean; data: string[] }>('/assets/tags');
+    const response = await apiClient.get<{success: boolean; data: string[]}>('/assets/tags');
     return response.data.data;
   },
 
@@ -183,7 +175,7 @@ export const assetsApi = {
    * 获取素材统计
    */
   getStats: async (): Promise<AssetStats> => {
-    const response = await apiClient.get<{ success: boolean; data: AssetStats }>('/assets/stats');
+    const response = await apiClient.get<{success: boolean; data: AssetStats}>('/assets/stats');
     return response.data.data;
   },
 };

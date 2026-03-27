@@ -82,12 +82,7 @@ export type MusicMode = 'simple' | 'custom' | 'instrumental';
 /**
  * 音乐模型
  */
-export type MusicModel =
-  | 'suno-v4'
-  | 'suno-v4.5'
-  | 'suno-v4.5plus'
-  | 'suno-v4.5all'
-  | 'suno-v5';
+export type MusicModel = 'suno-v4' | 'suno-v4.5' | 'suno-v4.5plus' | 'suno-v4.5all' | 'suno-v5';
 
 /**
  * 人声性别

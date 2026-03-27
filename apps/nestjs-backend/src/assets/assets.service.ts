@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '@next-nest-turbo-auth-boilerplate/db';
-import { Asset, AssetType } from '@prisma/client';
-import { CreateAssetDto, UpdateAssetDto, QueryAssetDto } from './dto';
-import { Prisma } from '@prisma/client';
+import {Injectable, NotFoundException, ForbiddenException} from '@nestjs/common';
+import {PrismaService} from '@next-nest-turbo-auth-boilerplate/db';
+import {Asset, AssetType} from '@prisma/client';
+import {CreateAssetDto, UpdateAssetDto, QueryAssetDto} from './dto';
+import {Prisma} from '@prisma/client';
 
 @Injectable()
 export class AssetsService {
@@ -36,7 +36,7 @@ export class AssetsService {
    * 查询素材列表
    */
   async findAll(userId: string, query: QueryAssetDto) {
-    const { page = 1, limit = 20, type, source, projectId, search, tag, isFavorite } = query;
+    const {page = 1, limit = 20, type, source, projectId, search, tag, isFavorite} = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.AssetWhereInput = {
@@ -68,8 +68,8 @@ export class AssetsService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { originalName: { contains: search, mode: 'insensitive' } },
+        {name: {contains: search, mode: 'insensitive'}},
+        {originalName: {contains: search, mode: 'insensitive'}},
       ];
     }
 
@@ -78,9 +78,9 @@ export class AssetsService {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' as const },
+        orderBy: {createdAt: 'desc' as const},
       }),
-      this.prisma.asset.count({ where }),
+      this.prisma.asset.count({where}),
     ]);
 
     return {
@@ -123,7 +123,7 @@ export class AssetsService {
     await this.findOne(userId, id);
 
     return this.prisma.asset.update({
-      where: { id },
+      where: {id},
       data: {
         name: dto.name,
         originalName: dto.originalName,
@@ -139,32 +139,32 @@ export class AssetsService {
   /**
    * 软删除素材
    */
-  async remove(userId: string, id: string): Promise<{ success: boolean }> {
+  async remove(userId: string, id: string): Promise<{success: boolean}> {
     // 检查素材是否存在且属于当前用户
     await this.findOne(userId, id);
 
     await this.prisma.asset.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+      where: {id},
+      data: {deletedAt: new Date()},
     });
 
-    return { success: true };
+    return {success: true};
   }
 
   /**
    * 批量删除素材
    */
-  async removeMany(userId: string, ids: string[]): Promise<{ success: boolean; count: number }> {
+  async removeMany(userId: string, ids: string[]): Promise<{success: boolean; count: number}> {
     const result = await this.prisma.asset.updateMany({
       where: {
-        id: { in: ids },
+        id: {in: ids},
         userId,
         deletedAt: null,
       },
-      data: { deletedAt: new Date() },
+      data: {deletedAt: new Date()},
     });
 
-    return { success: true, count: result.count };
+    return {success: true, count: result.count};
   }
 
   /**
@@ -174,8 +174,8 @@ export class AssetsService {
     const asset = await this.findOne(userId, id);
 
     return this.prisma.asset.update({
-      where: { id },
-      data: { isFavorite: !asset.isFavorite },
+      where: {id},
+      data: {isFavorite: !asset.isFavorite},
     });
   }
 
@@ -186,7 +186,7 @@ export class AssetsService {
     await this.findOne(userId, id);
 
     return this.prisma.asset.update({
-      where: { id },
+      where: {id},
       data: {
         tags: {
           push: tag,
@@ -202,7 +202,7 @@ export class AssetsService {
     const asset = await this.findOne(userId, id);
 
     return this.prisma.asset.update({
-      where: { id },
+      where: {id},
       data: {
         tags: asset.tags.filter((t) => t !== tag),
       },
@@ -238,18 +238,18 @@ export class AssetsService {
     const [totalCount, typeStats, storageUsed] = await Promise.all([
       // 总素材数
       this.prisma.asset.count({
-        where: { userId, deletedAt: null },
+        where: {userId, deletedAt: null},
       }),
       // 按类型统计
       this.prisma.asset.groupBy({
         by: ['type'],
-        where: { userId, deletedAt: null },
-        _count: { id: true },
+        where: {userId, deletedAt: null},
+        _count: {id: true},
       }),
       // 存储空间使用
       this.prisma.asset.aggregate({
-        where: { userId, deletedAt: null },
-        _sum: { fileSize: true },
+        where: {userId, deletedAt: null},
+        _sum: {fileSize: true},
       }),
     ]);
 

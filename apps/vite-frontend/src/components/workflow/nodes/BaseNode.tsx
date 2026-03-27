@@ -32,15 +32,7 @@ function getStatusIcon(status: NodeStatus) {
   }
 }
 
-export function BaseNode({
-  data,
-  icon,
-  color,
-  children,
-  inputs = [],
-  outputs = [],
-  selected,
-}: BaseNodeProps) {
+export function BaseNode({data, icon, color, children, inputs = [], outputs = [], selected}: BaseNodeProps) {
   return (
     <div
       className={`
@@ -51,21 +43,14 @@ export function BaseNode({
       style={{borderColor: selected ? color : `${color}80`}}
     >
       {/* Header */}
-      <div
-        className="px-3 py-2 rounded-t-md flex items-center gap-2"
-        style={{backgroundColor: `${color}20`}}
-      >
+      <div className="px-3 py-2 rounded-t-md flex items-center gap-2" style={{backgroundColor: `${color}20`}}>
         <div style={{color}}>{icon}</div>
         <span className="text-sm font-medium text-white flex-1">{data.label}</span>
         {getStatusIcon(data.status)}
       </div>
 
       {/* Content */}
-      {children && (
-        <div className="px-3 py-2 border-t border-white/10">
-          {children}
-        </div>
-      )}
+      {children && <div className="px-3 py-2 border-t border-white/10">{children}</div>}
 
       {/* Progress Bar */}
       {data.status === 'running' && typeof data.progress === 'number' && (
@@ -80,11 +65,7 @@ export function BaseNode({
       )}
 
       {/* Error Message */}
-      {data.error && (
-        <div className="px-3 pb-2 text-xs text-red-400">
-          {data.error}
-        </div>
-      )}
+      {data.error && <div className="px-3 pb-2 text-xs text-red-400">{data.error}</div>}
 
       {/* Input Handles */}
       {inputs.map((input, index) => (

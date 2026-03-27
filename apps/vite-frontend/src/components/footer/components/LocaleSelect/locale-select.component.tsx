@@ -30,8 +30,8 @@ export function LocaleSelect(): JSX.Element {
       </SelectTrigger>
       <SelectContent className="bg-slate-900 border-cyan-500/30">
         {SUPPORTED_LOCALES.map((localeOption) => (
-          <SelectItem 
-            key={localeOption} 
+          <SelectItem
+            key={localeOption}
             value={localeOption}
             className="text-cyan-100 hover:bg-cyan-500/10 hover:text-cyan-50 focus:bg-cyan-500/20 focus:text-cyan-50"
           >

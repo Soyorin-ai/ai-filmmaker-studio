@@ -1,6 +1,6 @@
-import { Helmet } from 'react-helmet-async';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import {Helmet} from 'react-helmet-async';
+import {useParams, Link, useNavigate} from 'react-router-dom';
+import {useState, useEffect, useCallback} from 'react';
 import {
   Plus,
   Search,
@@ -15,23 +15,17 @@ import {
   Image,
   Clock,
 } from 'lucide-react';
-import {
-  projectsApi,
-  Project,
-  ProjectStatus,
-  getProjectStatusLabel,
-  getProjectStatusColor,
-} from '../../api/projects';
+import {projectsApi, Project, ProjectStatus, getProjectStatusLabel, getProjectStatusColor} from '../../api/projects';
 
 const ITEMS_PER_PAGE = 12;
 
 export function ProjectsPage() {
-  const { locale } = useParams<{ locale: string }>();
+  const {locale} = useParams<{locale: string}>();
   const navigate = useNavigate();
 
   // State
   const [projects, setProjects] = useState<Project[]>([]);
-  const [stats, setStats] = useState<{ total: number; byStatus: Record<ProjectStatus, number> } | null>(null);
+  const [stats, setStats] = useState<{total: number; byStatus: Record<ProjectStatus, number>} | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -216,11 +210,19 @@ export function ProjectsPage() {
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
-                <Folder className="w-8 h-8 text-purple-500" style={{ filter: 'drop-shadow(0 0 10px rgba(168,85,247,0.5))' }} />
+              <h1
+                className="text-3xl font-bold text-white flex items-center gap-3"
+                style={{textShadow: '0 2px 8px rgba(0,0,0,0.8)'}}
+              >
+                <Folder
+                  className="w-8 h-8 text-purple-500"
+                  style={{filter: 'drop-shadow(0 0 10px rgba(168,85,247,0.5))'}}
+                />
                 项目管理
               </h1>
-              <p className="text-slate-200 mt-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>管理你的所有短片项目</p>
+              <p className="text-slate-200 mt-1" style={{textShadow: '0 1px 4px rgba(0,0,0,0.5)'}}>
+                管理你的所有短片项目
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -231,9 +233,7 @@ export function ProjectsPage() {
                   }
                 }}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isSelectMode
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  isSelectMode ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
                 {isSelectMode ? '取消选择' : '批量管理'}
@@ -257,27 +257,19 @@ export function ProjectsPage() {
               </div>
               <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
                 <div className="text-slate-300 text-sm font-medium">草稿</div>
-                <div className="text-2xl font-bold text-slate-400 mt-1">
-                  {stats.byStatus.DRAFT || 0}
-                </div>
+                <div className="text-2xl font-bold text-slate-400 mt-1">{stats.byStatus.DRAFT || 0}</div>
               </div>
               <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
                 <div className="text-slate-300 text-sm font-medium">进行中</div>
-                <div className="text-2xl font-bold text-blue-400 mt-1">
-                  {stats.byStatus.IN_PROGRESS || 0}
-                </div>
+                <div className="text-2xl font-bold text-blue-400 mt-1">{stats.byStatus.IN_PROGRESS || 0}</div>
               </div>
               <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
                 <div className="text-slate-300 text-sm font-medium">已完成</div>
-                <div className="text-2xl font-bold text-green-400 mt-1">
-                  {stats.byStatus.COMPLETED || 0}
-                </div>
+                <div className="text-2xl font-bold text-green-400 mt-1">{stats.byStatus.COMPLETED || 0}</div>
               </div>
               <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-600">
                 <div className="text-slate-300 text-sm font-medium">已归档</div>
-                <div className="text-2xl font-bold text-amber-400 mt-1">
-                  {stats.byStatus.ARCHIVED || 0}
-                </div>
+                <div className="text-2xl font-bold text-amber-400 mt-1">{stats.byStatus.ARCHIVED || 0}</div>
               </div>
             </div>
           )}
@@ -398,11 +390,7 @@ export function ProjectsPage() {
                     {/* Cover */}
                     <div className="aspect-video relative bg-slate-900">
                       {project.cover ? (
-                        <img
-                          src={project.cover}
-                          alt={project.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={project.cover} alt={project.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-900/30 to-pink-900/30">
                           <Film className="w-16 h-16 text-slate-600" />
@@ -452,13 +440,9 @@ export function ProjectsPage() {
 
                     {/* Info */}
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold text-white truncate">
-                        {project.name}
-                      </h3>
+                      <h3 className="text-lg font-semibold text-white truncate">{project.name}</h3>
                       {project.description && (
-                        <p className="text-sm text-slate-400 mt-1 line-clamp-2">
-                          {project.description}
-                        </p>
+                        <p className="text-sm text-slate-400 mt-1 line-clamp-2">{project.description}</p>
                       )}
                       <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
                         <span className="flex items-center gap-1">

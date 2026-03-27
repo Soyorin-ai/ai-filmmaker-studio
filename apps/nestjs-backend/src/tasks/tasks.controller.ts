@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import {Controller, Post, Get, Delete, Body, Param, Query, UseGuards} from '@nestjs/common';
 import {JwtAuthGuard} from '../auth/guards/jwt-auth.guard';
 import {TasksService} from './tasks.service';
 import {CreateImageTaskDto} from './dto/create-image-task.dto';
@@ -25,10 +16,7 @@ export class TasksController {
    * 创建图片生成任务
    */
   @Post('image')
-  async createImageTask(
-    @Body() dto: CreateImageTaskDto,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async createImageTask(@Body() dto: CreateImageTaskDto, @CurrentUser() user: JwtPayload) {
     const task = await this.tasksService.createImageTask(user.sub, {
       prompt: dto.prompt,
       negativePrompt: dto.negativePrompt,
@@ -48,10 +36,7 @@ export class TasksController {
    * 创建视频生成任务
    */
   @Post('video')
-  async createVideoTask(
-    @Body() dto: CreateVideoTaskDto,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async createVideoTask(@Body() dto: CreateVideoTaskDto, @CurrentUser() user: JwtPayload) {
     const task = await this.tasksService.createVideoTask(user.sub, {
       prompt: dto.prompt,
       type: dto.type,
@@ -104,10 +89,7 @@ export class TasksController {
    * 获取任务详情
    */
   @Get(':taskId')
-  async getTask(
-    @Param('taskId') taskId: string,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async getTask(@Param('taskId') taskId: string, @CurrentUser() user: JwtPayload) {
     const task = await this.tasksService.getTask(taskId, user.sub);
 
     if (!task) {
@@ -127,10 +109,7 @@ export class TasksController {
    * 取消任务
    */
   @Delete(':taskId')
-  async cancelTask(
-    @Param('taskId') taskId: string,
-    @CurrentUser() user: JwtPayload,
-  ) {
+  async cancelTask(@Param('taskId') taskId: string, @CurrentUser() user: JwtPayload) {
     const task = await this.tasksService.cancelTask(taskId, user.sub);
 
     if (!task) {

@@ -1,11 +1,6 @@
 import {Injectable, Logger, OnModuleInit} from '@nestjs/common';
 import {PrismaService} from '@next-nest-turbo-auth-boilerplate/db';
-import {
-  TaskType,
-  TaskStatus,
-  type Task,
-  type Prisma,
-} from '@prisma/client';
+import {TaskType, TaskStatus, type Task, type Prisma} from '@prisma/client';
 import {AiService} from '../ai/ai.service';
 
 @Injectable()
@@ -41,9 +36,7 @@ export class TasksService implements OnModuleInit {
       data: {
         userId,
         projectId: params.projectId,
-        type: params.referenceImage
-          ? TaskType.IMAGE_GEN_IMAGE
-          : TaskType.IMAGE_GEN_TEXT,
+        type: params.referenceImage ? TaskType.IMAGE_GEN_IMAGE : TaskType.IMAGE_GEN_TEXT,
         status: TaskStatus.PENDING,
         params: params as unknown as Prisma.JsonObject,
       },
@@ -243,10 +236,7 @@ export class TasksService implements OnModuleInit {
   /**
    * 处理图片生成任务
    */
-  private async processImageTask(
-    task: Task,
-    params: Record<string, unknown>,
-  ) {
+  private async processImageTask(task: Task, params: Record<string, unknown>) {
     const result = await this.aiService.generateImage({
       prompt: params.prompt as string,
       negativePrompt: params.negativePrompt as string,
@@ -293,10 +283,7 @@ export class TasksService implements OnModuleInit {
   /**
    * 处理视频生成任务
    */
-  private async processVideoTask(
-    task: Task,
-    params: Record<string, unknown>,
-  ) {
+  private async processVideoTask(task: Task, params: Record<string, unknown>) {
     const typeMap = {
       VIDEO_GEN_TEXT: 'text2video',
       VIDEO_GEN_IMAGE: 'image2video',
@@ -305,10 +292,7 @@ export class TasksService implements OnModuleInit {
 
     const result = await this.aiService.generateVideo({
       prompt: params.prompt as string,
-      type: typeMap[task.type as keyof typeof typeMap] as
-        | 'text2video'
-        | 'image2video'
-        | 'frame2video',
+      type: typeMap[task.type as keyof typeof typeMap] as 'text2video' | 'image2video' | 'frame2video',
       resolution: params.resolution as '480p' | '720p' | '1080p',
       duration: params.duration as number,
       generateAudio: params.generateAudio as boolean,
@@ -388,8 +372,7 @@ export class TasksService implements OnModuleInit {
               audioUrl: status.audioUrl,
             } as unknown as Prisma.JsonObject,
             completedAt: new Date(),
-            costVideo: (task.params as Record<string, unknown>)
-              .duration as number,
+            costVideo: (task.params as Record<string, unknown>).duration as number,
           },
         });
 

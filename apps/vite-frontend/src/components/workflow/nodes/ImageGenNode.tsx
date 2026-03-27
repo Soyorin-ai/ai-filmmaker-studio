@@ -17,11 +17,7 @@ export function ImageGenNode(props: NodeProps<ImageGenNodeData>) {
     >
       {data.imageUrl ? (
         <div className="rounded overflow-hidden">
-          <img
-            src={data.imageUrl}
-            alt="Generated"
-            className="w-full h-16 object-cover"
-          />
+          <img src={data.imageUrl} alt="Generated" className="w-full h-16 object-cover" />
         </div>
       ) : (
         <div className="text-xs text-white/60">

@@ -23,11 +23,7 @@ export function VideoGenNode(props: NodeProps<VideoGenNodeData>) {
     >
       {data.videoUrl ? (
         <div className="rounded overflow-hidden bg-black/50">
-          <video
-            src={data.videoUrl}
-            className="w-full h-16 object-cover"
-            muted
-          />
+          <video src={data.videoUrl} className="w-full h-16 object-cover" muted />
         </div>
       ) : (
         <div className="text-xs text-white/60">

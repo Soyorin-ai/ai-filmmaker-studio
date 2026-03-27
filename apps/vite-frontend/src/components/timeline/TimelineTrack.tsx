@@ -1,7 +1,7 @@
 // 时间线轨道组件
-import { useState, useRef, useCallback } from 'react';
-import type { TimelineTrack as TimelineTrackType, TimelineClip as TimelineClipType } from './types';
-import { TimelineClip } from './TimelineClip';
+import {useState, useRef, useCallback} from 'react';
+import type {TimelineTrack as TimelineTrackType, TimelineClip as TimelineClipType} from './types';
+import {TimelineClip} from './TimelineClip';
 
 interface TimelineTrackProps {
   track: TimelineTrackType;
@@ -48,16 +48,19 @@ export function TimelineTrack({
   const playheadPosition = currentTime * zoom;
 
   // 吸附到网格
-  const snapTime = useCallback((time: number) => {
-    if (!snapToGrid) return time;
-    return Math.round(time / gridSize) * gridSize;
-  }, [snapToGrid, gridSize]);
+  const snapTime = useCallback(
+    (time: number) => {
+      if (!snapToGrid) return time;
+      return Math.round(time / gridSize) * gridSize;
+    },
+    [snapToGrid, gridSize],
+  );
 
   // 处理片段拖拽开始
   const handleClipDragStart = (clipId: string, e: React.MouseEvent) => {
     if (track.locked) return;
-    
-    const clip = track.clips.find(c => c.id === clipId);
+
+    const clip = track.clips.find((c) => c.id === clipId);
     if (!clip) return;
 
     dragRef.current = {
@@ -68,14 +71,14 @@ export function TimelineTrack({
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       if (!dragRef.current) return;
-      
+
       const deltaX = moveEvent.clientX - dragRef.current.startX;
       const deltaTime = deltaX / zoom;
       let newStartTime = snapTime(dragRef.current.startTime + deltaTime);
-      
+
       // 限制不能小于0
       if (newStartTime < 0) newStartTime = 0;
-      
+
       onMoveClip(clipId, newStartTime);
     };
 
@@ -122,15 +125,11 @@ export function TimelineTrack({
             <span>{getTrackIcon()}</span>
             <span className="text-sm text-white truncate">{track.name}</span>
           </div>
-          <button
-            className="text-slate-400 hover:text-red-400 text-xs"
-            onClick={onDeleteTrack}
-            title="删除轨道"
-          >
+          <button className="text-slate-400 hover:text-red-400 text-xs" onClick={onDeleteTrack} title="删除轨道">
             ✕
           </button>
         </div>
-        
+
         {/* 轨道控制按钮 */}
         <div className="flex items-center gap-1">
           <button
@@ -166,11 +165,11 @@ export function TimelineTrack({
       {/* 轨道内容区 */}
       <div
         className={`relative h-16 bg-slate-900 ${track.locked ? 'opacity-60' : ''}`}
-        style={{ width: totalWidth }}
+        style={{width: totalWidth}}
         onClick={onSelectTrack}
       >
         {/* 片段 */}
-        {track.clips.map(clip => (
+        {track.clips.map((clip) => (
           <TimelineClip
             key={clip.id}
             clip={clip}
@@ -189,7 +188,7 @@ export function TimelineTrack({
         {/* 播放头 */}
         <div
           className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none"
-          style={{ left: playheadPosition }}
+          style={{left: playheadPosition}}
         />
       </div>
     </div>
